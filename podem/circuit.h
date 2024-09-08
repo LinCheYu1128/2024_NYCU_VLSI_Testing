@@ -17,6 +17,16 @@ class CIRCUIT
         vector<GATE*> POlist;
         vector<GATE*> PPIlist;
         vector<GATE*> PPOlist;
+        // Gate list
+        vector<GATE*> Gatelist;
+        vector<GATE*> NOTlist;
+        vector<GATE*> ANDlist;
+        vector<GATE*> NANDlist;
+        vector<GATE*> ORlist;
+        vector<GATE*> NORlist;
+        vector<GATE*> DFFlist;
+        vector<GATE*> BUFlist;
+
         list<FAULT*> Flist; //collapsing fault list
         list<FAULT*> UFlist; //undetected fault list
         list<TFAULT*> TFlist; //collapsing fault list
@@ -70,6 +80,14 @@ class CIRCUIT
         unsigned No_PO() { return POlist.size(); }
         unsigned No_PPI() { return PPIlist.size(); }
         unsigned No_PPO() { return PPOlist.size(); }
+        unsigned No_Total_Gate() { return NOTlist.size() + ANDlist.size() + NANDlist.size() + ORlist.size() + NORlist.size(); }
+        unsigned No_NOT_Gate() { return NOTlist.size(); }
+        unsigned No_AND_Gate() { return ANDlist.size(); }
+        unsigned No_NAND_Gate() { return NANDlist.size(); }
+        unsigned No_OR_Gate() { return ORlist.size(); }
+        unsigned No_NOR_Gate() { return NORlist.size(); }
+        unsigned No_BUF_Gate() { return BUFlist.size(); }
+        unsigned No_DFF_Gate() { return DFFlist.size(); }
 
         void InitPattern(const char *pattern) {
             Pattern.Initialize(const_cast<char *>(pattern), PIlist.size(), "PI");
