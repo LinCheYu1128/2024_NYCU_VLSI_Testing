@@ -3,6 +3,7 @@
 #include "circuit.h"
 #include "GetLongOpt.h"
 #include <stack>
+#include <list>
 using namespace std;
 
 extern GetLongOpt option;
@@ -52,67 +53,94 @@ void CIRCUIT::PrintAssignment0()
     cout << "====================================================" << endl;
 }
 
-void CIRCUIT::printAllPathsUtil(int u, int d, bool visited[], int path[], int &path_index)
+void CIRCUIT::printAllPathsUtil(unsigned u, unsigned d, unsigned path[], unsigned &path_index)
 {
     GATE* current_gate = Gate(u);
-    visited[u] = true;
     path[path_index] = u;
     path_index++;
 
     if (u == d){
-        for (int i = 0; i < path_index; i++){
-            cout << "  " << Gate(path[i])->GetName() << " ";
-        }
-        cout << endl;
+        // for (int i = 0; i < path_index; i++){
+        //     cout << Gate(path[i])->GetName() << " ";
+        // }
+        count ++;
+        cout << "Path found " << count << endl;
+        // cout << endl;
     }
     else{
-        for (unsigned i = 0; i < current_gate->No_Fanout(); i++){
-            if (!visited[current_gate->Fanout(i)->GetID()]){
-                printAllPathsUtil(current_gate->Fanout(i)->GetID(), d, visited, path, path_index);
+        if(current_gate->No_Fanout() != 0){
+            for (unsigned i = 0; i < current_gate->No_Fanout(); i++){
+                printAllPathsUtil(current_gate->Fanout(i)->GetID(), d, path, path_index);
             }
         }
     }
     path_index--;
-    visited[u] = false;
 }
 
 void CIRCUIT::GenerateAllPaths(string start, string end)
 {
+    cout << "Number of gates: " << No_Gate() << endl;
     GATE* start_gate = FindGate(start, "PI");
-    cout << "Start: " << start_gate->GetName() << " ID: " << start_gate->GetID() << endl;
+    unsigned start_gate_id = start_gate->GetID();
+    if(start_gate == nullptr){
+        cout << "Start gate not found" << endl;
+        return;
+    }
+    else{
+        cout << "Start gate found: " << start_gate->GetName() << " (ID:" << start_gate->GetID() << ")" << endl;
+    }
     GATE* end_gate = FindGate(end, "PO");
-    cout << "End: " << end_gate->GetName() << " ID: " << end_gate->GetID() << endl;
+    unsigned end_gate_id = end_gate->GetID();
+    if(end_gate == nullptr){
+        cout << "End gate not found" << endl;
+        return;
+    }
+    else{
+        cout << "End gate found: " << end_gate->GetName() << " (ID:" << end_gate->GetID() << ")" << endl;
+    }
     
-    vector<GATE*> path;
-    
-    int count = 0;
 
-    // pre-order traversal
-    stack<GATE*> stack;
-    stack.push(start_gate);
+    // ***************************** recursive function to print all paths ********************** // not working in c6288
+    // unsigned *path = new unsigned[No_Gate()];
+    // unsigned path_index = 0;
+    // count = 0;
+    // printAllPathsUtil(start_gate_id, end_gate_id, path, path_index);
+    // ****************************************************************************************** //
+    
+    // ***************************** iterative function to print all paths ********************** //
+    vector<unsigned> path;
+    vector<unsigned> stack;
+    stack.push_back(start_gate_id);
+    
+    vector<bool> visited; // to check the gate have the path or not
+    visited.reserve(No_Gate());
+    for (unsigned i = 0; i < No_Gate(); i++){
+        visited.push_back(false);
+    }
+
+    unsigned next_gate_id;
+    unsigned current_gate_id;
+
     while (!stack.empty()){
-        GATE* current_gate = stack.top(); 
-        stack.pop();
-        for(unsigned i = 0; i < current_gate->No_Fanout(); i++){
-            GATE* next_gate = current_gate->Fanout(i);
-            stack.push(next_gate);
-            path.push_back(next_gate);
+        current_gate_id = stack.back(); 
+        stack.pop_back();
+        if(current_gate_id == end_gate_id){
+            // for (unsigned i = 0; i < path.size(); i++){
+            //     cout << Gate(path[i])->GetName() << " ";
+            // }
+            // cout << endl;
+            count ++;
+            cout << "Path found " << count << endl;
+        }
+        else{
+            for(unsigned i = 0; i < Gate(current_gate_id)->No_Fanout(); i++){
+                next_gate_id = Gate(current_gate_id)->Fanout(i)->GetID();
+                stack.push_back(next_gate_id);
+            }
         }
     }
     
-    // while (current_gate->GetFunction() != G_PO && current_gate->No_Fanout() > 0){
-    //     path.push_back(current_gate);
-    //     current_gate = current_gate->Fanout(0);
-    // }
-
-    for (const auto &item : path){
-        cout << "  " << item->GetName() << " ";
-    }
-    cout << endl;
-    
-    // for(unsigned i = 0; i < start_gate->No_Fanout(); i++){
-    //     cout << "  " << start_gate->Fanout(i)->GetName() << " " << start_gate->Fanout(i)->GetID() << endl;
-    // }
+    cout << "The paths from " << start_gate->GetName() << " to " << end_gate->GetName() << ": " << count << endl;    
     
 }
 

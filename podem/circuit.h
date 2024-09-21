@@ -41,6 +41,9 @@ class CIRCUIT
         ListofGate PropagateTree;
         ListofGateIte QueueIte;
 
+        // for assignment 1 path finding parameters
+        int count;
+
     public:
         //Initialize netlist
         CIRCUIT(): MaxLevel(0), BackTrackLimit(10000) {
@@ -107,7 +110,7 @@ class CIRCUIT
 
         // For assignment 1
         void GenerateAllPaths(string start, string end);
-        void printAllPathsUtil(int u, int d, bool visited[], int path[], int &path_index);
+        void printAllPathsUtil(unsigned u, unsigned d, unsigned path[], unsigned &path_index);
         GATE* FindGate(string name, string type);
 
         //defined in circuit.cc
