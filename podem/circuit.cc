@@ -81,7 +81,6 @@ void CIRCUIT::GenerateAllPaths(string start, string end)
 {
     cout << "Number of gates: " << No_Gate() << endl;
     GATE* start_gate = FindGate(start, "PI");
-    unsigned start_gate_id = start_gate->GetID();
     if(start_gate == nullptr){
         cout << "Start gate not found" << endl;
         return;
@@ -90,7 +89,6 @@ void CIRCUIT::GenerateAllPaths(string start, string end)
         cout << "Start gate found: " << start_gate->GetName() << " (ID:" << start_gate->GetID() << ")" << endl;
     }
     GATE* end_gate = FindGate(end, "PO");
-    unsigned end_gate_id = end_gate->GetID();
     if(end_gate == nullptr){
         cout << "End gate not found" << endl;
         return;
@@ -108,9 +106,9 @@ void CIRCUIT::GenerateAllPaths(string start, string end)
     // ****************************************************************************************** //
     
     // ***************************** iterative function to print all paths ********************** //
-    vector<unsigned> path;
-    vector<unsigned> stack;
-    stack.push_back(start_gate_id);
+    vector<GATE*> path;
+    vector<GATE*> stack;
+    stack.push_back(start_gate);
     
     vector<bool> visited; // to check the gate have the path or not
     visited.reserve(No_Gate());
@@ -118,13 +116,13 @@ void CIRCUIT::GenerateAllPaths(string start, string end)
         visited.push_back(false);
     }
 
-    unsigned next_gate_id;
-    unsigned current_gate_id;
+    GATE* next_gate;
+    GATE* current_gate;
 
     while (!stack.empty()){
-        current_gate_id = stack.back(); 
+        current_gate = stack.back(); 
         stack.pop_back();
-        if(current_gate_id == end_gate_id){
+        if(current_gate == end_gate){
             // for (unsigned i = 0; i < path.size(); i++){
             //     cout << Gate(path[i])->GetName() << " ";
             // }
@@ -133,9 +131,9 @@ void CIRCUIT::GenerateAllPaths(string start, string end)
             cout << "Path found " << count << endl;
         }
         else{
-            for(unsigned i = 0; i < Gate(current_gate_id)->No_Fanout(); i++){
-                next_gate_id = Gate(current_gate_id)->Fanout(i)->GetID();
-                stack.push_back(next_gate_id);
+            for(unsigned i = 0; i < current_gate->No_Fanout(); i++){
+                next_gate = current_gate->Fanout(i);
+                stack.push_back(next_gate);
             }
         }
     }
