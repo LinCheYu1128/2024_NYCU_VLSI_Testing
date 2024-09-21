@@ -38,7 +38,13 @@ int SetupOption(int argc, char ** argv)
     option.enroll("bt", GetLongOpt::OptionalValue,
             "set the backtrack limit", 0);
     option.enroll("ass0", GetLongOpt::NoValue,
-            "run interactive mode", 0);
+            "print circuit info", 0);
+    option.enroll("path", GetLongOpt::NoValue,
+            "list and count all possible paths connecting the given PI and PO", 0);
+    option.enroll("start", GetLongOpt::MandatoryValue,
+            "set the starting PI", 0);
+    option.enroll("end", GetLongOpt::MandatoryValue,
+            "set the ending PO", 0);
     int optind = option.parse(argc, argv);
     if ( optind < 1 ) { exit(0); }
     if ( option.retrieve("help") ) {
@@ -115,6 +121,11 @@ int main(int argc, char ** argv)
     else if (option.retrieve("ass0")) {
         cout << "run assignment 0" << endl;
         Circuit.PrintAssignment0();
+    }
+    else if (option.retrieve("path")) {
+        Circuit.MarkOutputGate();
+        cout << "List all possible paths connecting " << option.retrieve("start") << " and " << option.retrieve("end") << endl;
+        Circuit.GenerateAllPaths(option.retrieve("start"), option.retrieve("end"));
     }
     else {
         Circuit.GenerateAllFaultList();

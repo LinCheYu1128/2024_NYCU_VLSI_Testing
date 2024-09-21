@@ -26,6 +26,7 @@ class CIRCUIT
         vector<GATE*> NORlist;
         vector<GATE*> DFFlist;
         vector<GATE*> BUFlist;
+    
 
         list<FAULT*> Flist; //collapsing fault list
         list<FAULT*> UFlist; //undetected fault list
@@ -103,6 +104,11 @@ class CIRCUIT
         
         // For assignment 0
         void PrintAssignment0();
+
+        // For assignment 1
+        void GenerateAllPaths(string start, string end);
+        void printAllPathsUtil(int u, int d, bool visited[], int path[], int &path_index);
+        GATE* FindGate(string name, string type);
 
         //defined in circuit.cc
         void Levelize();

@@ -2,6 +2,7 @@
 //#include <alg.h>
 #include "circuit.h"
 #include "GetLongOpt.h"
+#include <stack>
 using namespace std;
 
 extern GetLongOpt option;
@@ -51,6 +52,102 @@ void CIRCUIT::PrintAssignment0()
     cout << "====================================================" << endl;
 }
 
+void CIRCUIT::printAllPathsUtil(int u, int d, bool visited[], int path[], int &path_index)
+{
+    GATE* current_gate = Gate(u);
+    visited[u] = true;
+    path[path_index] = u;
+    path_index++;
+
+    if (u == d){
+        for (int i = 0; i < path_index; i++){
+            cout << "  " << Gate(path[i])->GetName() << " ";
+        }
+        cout << endl;
+    }
+    else{
+        for (unsigned i = 0; i < current_gate->No_Fanout(); i++){
+            if (!visited[current_gate->Fanout(i)->GetID()]){
+                printAllPathsUtil(current_gate->Fanout(i)->GetID(), d, visited, path, path_index);
+            }
+        }
+    }
+    path_index--;
+    visited[u] = false;
+}
+
+void CIRCUIT::GenerateAllPaths(string start, string end)
+{
+    GATE* start_gate = FindGate(start, "PI");
+    cout << "Start: " << start_gate->GetName() << " ID: " << start_gate->GetID() << endl;
+    GATE* end_gate = FindGate(end, "PO");
+    cout << "End: " << end_gate->GetName() << " ID: " << end_gate->GetID() << endl;
+    
+    vector<GATE*> path;
+    
+    int count = 0;
+
+    // pre-order traversal
+    stack<GATE*> stack;
+    stack.push(start_gate);
+    while (!stack.empty()){
+        GATE* current_gate = stack.top(); 
+        stack.pop();
+        for(unsigned i = 0; i < current_gate->No_Fanout(); i++){
+            GATE* next_gate = current_gate->Fanout(i);
+            stack.push(next_gate);
+            path.push_back(next_gate);
+        }
+    }
+    
+    // while (current_gate->GetFunction() != G_PO && current_gate->No_Fanout() > 0){
+    //     path.push_back(current_gate);
+    //     current_gate = current_gate->Fanout(0);
+    // }
+
+    for (const auto &item : path){
+        cout << "  " << item->GetName() << " ";
+    }
+    cout << endl;
+    
+    // for(unsigned i = 0; i < start_gate->No_Fanout(); i++){
+    //     cout << "  " << start_gate->Fanout(i)->GetName() << " " << start_gate->Fanout(i)->GetID() << endl;
+    // }
+    
+}
+
+GATE* CIRCUIT::FindGate(string name, string type)
+{
+    if(type == "PI"){
+        for (unsigned i = 0;i < No_PI();i++) {
+            if (PIGate(i)->GetName() == name) {
+                return PIGate(i);
+            }
+        }
+    }
+    else if(type == "PO"){
+        for (unsigned i = 0;i < No_PO();i++) {
+            if (POGate(i)->GetName() == name) {
+                return POGate(i);
+            }
+        }
+    }
+    else if(type == "PPI"){
+        for (unsigned i = 0;i < No_PPI();i++) {
+            if (PPIGate(i)->GetName() == name) {
+                return PPIGate(i);
+            }
+        }
+    }
+    else if(type == "PPO"){
+        for (unsigned i = 0;i < No_PPO();i++) {
+            if (PPOGate(i)->GetName() == name) {
+                return PPOGate(i);
+            }
+        }
+    }
+    return nullptr;
+}
 
 void CIRCUIT::FanoutList()
 {
