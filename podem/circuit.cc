@@ -53,92 +53,92 @@ void CIRCUIT::PrintAssignment0()
     cout << "====================================================" << endl;
 }
 
-void CIRCUIT::printAllPathsUtil(unsigned u, unsigned d, unsigned path[], unsigned &path_index)
+void CIRCUIT::reverseTraversal(vector<bool> &canReach, GATE* end_gate)
 {
-    GATE* current_gate = Gate(u);
-    path[path_index] = u;
-    path_index++;
+    vector<GATE*> stack;
+    stack.push_back(end_gate);
+    canReach.at(end_gate->GetID()) = true;
 
-    if (u == d){
-        // for (int i = 0; i < path_index; i++){
-        //     cout << Gate(path[i])->GetName() << " ";
-        // }
-        count ++;
-        cout << "Path found " << count << endl;
-        // cout << endl;
-    }
-    else{
-        if(current_gate->No_Fanout() != 0){
-            for (unsigned i = 0; i < current_gate->No_Fanout(); i++){
-                printAllPathsUtil(current_gate->Fanout(i)->GetID(), d, path, path_index);
+    while (!stack.empty()){
+        GATE* current_gate = stack.back();
+        stack.pop_back();
+        for (unsigned i = 0; i < current_gate->No_Fanin(); i++){
+            GATE* next_gate = current_gate->Fanin(i);
+            if(!canReach.at(next_gate->GetID())){
+                canReach.at(next_gate->GetID()) = true;
+                stack.push_back(next_gate);
             }
         }
     }
-    path_index--;
 }
 
 void CIRCUIT::GenerateAllPaths(string start, string end)
 {
-    cout << "Number of gates: " << No_Gate() << endl;
     GATE* start_gate = FindGate(start, "PI");
     if(start_gate == nullptr){
         cout << "Start gate not found" << endl;
         return;
     }
-    else{
-        cout << "Start gate found: " << start_gate->GetName() << " (ID:" << start_gate->GetID() << ")" << endl;
-    }
+    // else{
+    //     cout << "Start gate found: " << start_gate->GetName() << " (ID:" << start_gate->GetID() << ")" << endl;
+    // }
     GATE* end_gate = FindGate(end, "PO");
     if(end_gate == nullptr){
         cout << "End gate not found" << endl;
         return;
     }
-    else{
-        cout << "End gate found: " << end_gate->GetName() << " (ID:" << end_gate->GetID() << ")" << endl;
-    }
-    
-
-    // ***************************** recursive function to print all paths ********************** // not working in c6288
-    // unsigned *path = new unsigned[No_Gate()];
-    // unsigned path_index = 0;
-    // count = 0;
-    // printAllPathsUtil(start_gate_id, end_gate_id, path, path_index);
-    // ****************************************************************************************** //
-    
+    // else{
+    //     cout << "End gate found: " << end_gate->GetName() << " (ID:" << end_gate->GetID() << ")" << endl;
+    // }
+        
     // ***************************** iterative function to print all paths ********************** //
+
     vector<GATE*> path;
-    vector<GATE*> stack;
-    stack.push_back(start_gate);
+    path.push_back(start_gate);
+
+    vector<pair<GATE*, vector<GATE*>>> stack; // DFS stack
+    stack.push_back({start_gate, path});
     
-    vector<bool> visited; // to check the gate have the path or not
-    visited.reserve(No_Gate());
+    vector<bool> canReach; // to check the gate have the path or not
+    canReach.reserve(No_Gate());
     for (unsigned i = 0; i < No_Gate(); i++){
-        visited.push_back(false);
+        canReach.push_back(false);
     }
+    
+    reverseTraversal(canReach, end_gate); // prunning the gates that can't reach the end gate
 
     GATE* next_gate;
     GATE* current_gate;
-
-    while (!stack.empty()){
-        current_gate = stack.back(); 
+    int count = 0;
+    
+    while (!stack.empty()){               // DFS
+        current_gate = stack.back().first;
+        path = stack.back().second;
         stack.pop_back();
+
         if(current_gate == end_gate){
-            // for (unsigned i = 0; i < path.size(); i++){
-            //     cout << Gate(path[i])->GetName() << " ";
-            // }
-            // cout << endl;
-            count ++;
-            cout << "Path found " << count << endl;
+            count ++; 
+            // cout << "Path found: " << count << endl;
+            for (auto &gate : path){
+                cout << gate->GetName() << " ";
+            }
+            cout << endl;
+            
         }
         else{
             for(unsigned i = 0; i < current_gate->No_Fanout(); i++){
-                next_gate = current_gate->Fanout(i);
-                stack.push_back(next_gate);
+                if(canReach.at(current_gate->Fanout(i)->GetID())){
+                    next_gate = current_gate->Fanout(i);
+                    vector<GATE*> next_path = path;
+                    next_path.push_back(next_gate);
+                    stack.push_back({next_gate, next_path});
+                }
             }
         }
+        
     }
     
-    cout << "The paths from " << start_gate->GetName() << " to " << end_gate->GetName() << ": " << count << endl;    
+    cout << "The paths from " << start << " to " << end << ": " << count << endl;    
     
 }
 
