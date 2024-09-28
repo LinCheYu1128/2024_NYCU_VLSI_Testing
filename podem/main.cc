@@ -45,6 +45,12 @@ int SetupOption(int argc, char ** argv)
             "set the starting PI", 0);
     option.enroll("end", GetLongOpt::MandatoryValue,
             "set the ending PO", 0);
+    option.enroll("pattern", GetLongOpt::NoValue,
+            "gen pattern generation", 0);
+    option.enroll("num", GetLongOpt::MandatoryValue,
+            "set the number of patterns to generate", 0);
+    option.enroll("unknown", GetLongOpt::NoValue,
+            "generate pattern with unknown", 0);
     int optind = option.parse(argc, argv);
     if ( optind < 1 ) { exit(0); }
     if ( option.retrieve("help") ) {
@@ -126,6 +132,10 @@ int main(int argc, char ** argv)
         Circuit.MarkOutputGate();
         cout << "List all possible paths connecting " << option.retrieve("start") << " and " << option.retrieve("end") << endl;
         Circuit.GenerateAllPaths(option.retrieve("start"), option.retrieve("end"));
+    }
+    else if(option.retrieve("pattern")) {
+        cout << "run pattern generation" << endl;
+        Circuit.GeneratePattern(option.retrieve("input"), stoi(option.retrieve("num")));
     }
     else {
         Circuit.GenerateAllFaultList();

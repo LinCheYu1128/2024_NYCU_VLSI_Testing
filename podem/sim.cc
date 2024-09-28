@@ -13,6 +13,7 @@ extern GetLongOpt option;
 void CIRCUIT::LogicSimVectors()
 {
     cout << "Run logic simulation" << endl;
+    patternoutput.open(option.retrieve("output"), ios::out);
     //read test patterns
     while (!Pattern.eof()) {
         Pattern.ReadNextPattern();
@@ -20,6 +21,7 @@ void CIRCUIT::LogicSimVectors()
         LogicSim();
         PrintIO();
     }
+    patternoutput.close();
     return;
 }
 
@@ -182,13 +184,51 @@ void PATTERN::ReadNextPattern()
     return;
 }
 
+void PATTERN::GenerateRandomPattern(unsigned num, vector<GATE*> GATElist, string TAG)
+{
+    patternoutput.open(option.retrieve("output"), ios::out);
+    for (unsigned j = 0;j < GATElist.size();++j) {
+        patternoutput << TAG << " " << GATElist[j]->GetName() << " ";
+    }
+    patternoutput << endl;
+    for (unsigned i = 0;i < num; ++i) {
+        for (unsigned j = 0;j < GATElist.size();++j) {
+            int temp;
+            if(option.retrieve("unknown")) temp = int(10.0 * (rand() / (RAND_MAX + 1.0)))%3;
+            else temp = int(10.0 * (rand() / (RAND_MAX + 1.0)))%2;
+            if (temp == 0) {
+                patternoutput << "0";
+            }
+            else if (temp == 1) {
+                patternoutput << "1";
+            }
+            else {
+                patternoutput << "X";
+            }
+        }
+        patternoutput << endl;
+    }
+    patternoutput.close();
+    return;
+}
+
 void CIRCUIT::PrintIO()
 {
     register unsigned i;
-    for (i = 0;i<No_PI();++i) { cout << PIGate(i)->GetValue(); }
+    // write the output pattern
+    patternoutput << "PI: ";
+    for (i = 0;i<No_PI();++i) { 
+        cout << PIGate(i)->GetValue(); 
+        patternoutput << PIGate(i)->GetValue();
+    }
     cout << " ";
-    for (i = 0;i<No_PO();++i) { cout << POGate(i)->GetValue(); }
+    patternoutput << " PO: ";
+    for (i = 0;i<No_PO();++i) { 
+        cout << POGate(i)->GetValue(); 
+        patternoutput << POGate(i)->GetValue();
+    }
     cout << endl;
+    patternoutput << endl;
     return;
 }
 

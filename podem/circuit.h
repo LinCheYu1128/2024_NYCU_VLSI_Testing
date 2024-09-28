@@ -4,6 +4,7 @@
 #include "tfault.h"
 #include "ReadPattern.h"
 #include <stdlib.h>
+#include <fstream>
 
 typedef GATE* GATEPTR;
 
@@ -26,7 +27,8 @@ class CIRCUIT
         vector<GATE*> NORlist;
         vector<GATE*> DFFlist;
         vector<GATE*> BUFlist;
-    
+        // pattern output
+        ofstream patternoutput;
 
         list<FAULT*> Flist; //collapsing fault list
         list<FAULT*> UFlist; //undetected fault list
@@ -109,6 +111,11 @@ class CIRCUIT
         void GenerateAllPaths(string start, string end);
         void reverseTraversal(vector<bool> &canReach, GATE* end_gate);
         GATE* FindGate(string name, string type);
+
+        // For assignment 2
+        void GeneratePattern(const char *pattern, int num) {
+            Pattern.GenerateRandomPattern(num, PIlist, "PI");
+        }
 
         //defined in circuit.cc
         void Levelize();

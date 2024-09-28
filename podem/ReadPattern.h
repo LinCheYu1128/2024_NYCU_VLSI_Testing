@@ -9,6 +9,7 @@ class PATTERN
 {
     private:
         ifstream patterninput;
+        ofstream patternoutput;
         vector<GATE*> inlist;
         int no_pi_infile;
     public:
@@ -22,5 +23,6 @@ class PATTERN
         {
             return (patterninput.eof());
         }
+    void GenerateRandomPattern(unsigned num, vector<GATE*> GATElist, string TAG);
 };
 #endif
