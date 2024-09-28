@@ -19,7 +19,7 @@ void CIRCUIT::LogicSimVectors()
         Pattern.ReadNextPattern();
         SchedulePI();
         LogicSim();
-        PrintIO("VALUE");
+        PrintIO();
     }
     patternoutput.close();
     return;
@@ -51,10 +51,10 @@ void CIRCUIT::ModLogicSimVectors()
     patternoutput.open(option.retrieve("output"), ios::out);
     //read test patterns
     while (!Pattern.eof()) {
-        Pattern.ModReadNextPattern();
+        Pattern.ReadNextPattern();
         SchedulePI();
         ModLogicSim();
-        PrintIO("TRI");
+        PrintIO();
     }
     patternoutput.close();
     return;
@@ -63,15 +63,15 @@ void CIRCUIT::ModLogicSimVectors()
 void CIRCUIT::ModLogicSim()
 {
     GATE* gptr;
-    TRI new_value;
+    VALUE new_value;
     for (unsigned i = 0;i <= MaxLevel;i++) {
         while (!Queue[i].empty()) {
             gptr = Queue[i].front();
             Queue[i].pop_front();
             gptr->ResetFlag(SCHEDULED);
             new_value = ModEvaluate(gptr);
-            if (new_value != gptr->GetTri()) {
-                gptr->SetTri(new_value);
+            if (new_value != gptr->GetValue()) {
+                gptr->SetValue(new_value);
                 ScheduleFanout(gptr);
             }
         }
@@ -160,29 +160,48 @@ VALUE CIRCUIT::Evaluate(GATEPTR gptr)
     return value;
 }
 
-TRI CIRCUIT::ModEvaluate(GATEPTR gptr)
+TRI ValueToTri(VALUE value)
+{
+    switch (value) {
+        case S0: return LOW;
+        case S1: return HIGH;
+        default: return UNDEFINED0;
+    }
+}
+
+VALUE TRItoValue(TRI value)
+{
+    switch (value) {
+        case LOW: return S0;
+        case HIGH: return S1;
+        default: return X;
+    }
+}
+
+VALUE CIRCUIT::ModEvaluate(GATEPTR gptr)
 {
     GATEFUNC fun(gptr->GetFunction());
-    TRI cv(CV_TRI[fun]); //controling value
-    TRI value(gptr->Fanin(0)->GetTri());
+    VALUE cv(CV[fun]); //controling value
+    VALUE value(gptr->Fanin(0)->GetValue());
+    TRI tri_value(ValueToTri(value));
     switch (fun) {
         case G_AND:
         case G_NAND:
             for (unsigned i = 1; i < gptr->No_Fanin() && value != cv;++i) {
-                value = TRI(value & gptr->Fanin(i)->GetTri());
+                tri_value = TRI(tri_value & ValueToTri(gptr->Fanin(i)->GetValue()));
             }
             break;
         case G_OR:
         case G_NOR:
             for (unsigned i = 1;i<gptr->No_Fanin() && value != cv;++i) {
-                value = TRI(value | gptr->Fanin(i)->GetTri());
+                tri_value = TRI(tri_value | ValueToTri(gptr->Fanin(i)->GetValue()));
             }
             break;
         default: break;
     }
     //NAND, NOR and NOT
-    if (gptr->Is_Inversion()) { value = TRI(~value & 0b11); }
-    return value;
+    if (gptr->Is_Inversion()) { tri_value = TRI(~tri_value & 0b11); }
+    return TRItoValue(tri_value);
 }
 
 extern GATE* NameToGate(string);
@@ -243,35 +262,6 @@ void PATTERN::ReadNextPattern()
     return;
 }
 
-void PATTERN::ModReadNextPattern()
-{
-    char V;
-    for (int i = 0;i < no_pi_infile;i++) {
-        patterninput >> V;
-        if (V == '0') {
-            if (inlist[i]->GetTri() != LOW) {
-                inlist[i]->SetFlag(SCHEDULED);
-                inlist[i]->SetTri(LOW);
-            }
-        }
-        else if (V == '1') {
-            if (inlist[i]->GetTri() != HIGH) {
-                inlist[i]->SetFlag(SCHEDULED);
-                inlist[i]->SetTri(HIGH);
-            }
-        }
-        else if (V == 'X') {
-            if (inlist[i]->GetTri() != UNDEFINED0) {
-                inlist[i]->SetFlag(SCHEDULED);
-                inlist[i]->SetTri(UNDEFINED0);
-            }
-        }
-    }
-    //Take care of newline to force eof() function correctly
-    patterninput >> V;
-    if (!patterninput.eof()) patterninput.unget();
-    return;
-}
 
 void PATTERN::GenerateRandomPattern(unsigned num, vector<GATE*> GATElist, string TAG)
 {
@@ -301,80 +291,43 @@ void PATTERN::GenerateRandomPattern(unsigned num, vector<GATE*> GATElist, string
     return;
 }
 
-void CIRCUIT::PrintIO(string type)
+void CIRCUIT::PrintIO()
 {
     register unsigned i;
     // write the output pattern
-    if(type == "VALUE") {
-        patternoutput << "PI: ";
-        for (i = 0;i<No_PI();++i) { 
-            if(PIGate(i)->GetValue() == S0) {
-                cout << "0";
-                patternoutput << "0";
-            }
-            else if(PIGate(i)->GetValue() == S1) {
-                cout << "1";
-                patternoutput << "1";
-            }
-            else {
-                cout << "X";
-                patternoutput << "X";
-            }
+    patternoutput << "PI: ";
+    for (i = 0; i<No_PI(); ++i) { 
+        if(PIGate(i)->GetValue() == S0) {
+            cout << "0";
+            patternoutput << "0";
         }
-        cout << " ";
-        patternoutput << " PO: ";
-        for (i = 0;i<No_PO();++i) { 
-            if(POGate(i)->GetValue() == S0) {
-                cout << "0";
-                patternoutput << "0";
-            }
-            else if(POGate(i)->GetValue() == S1) {
-                cout << "1";
-                patternoutput << "1";
-            }
-            else {
-                cout << "X";
-                patternoutput << "X";
-            }
+        else if(PIGate(i)->GetValue() == S1) {
+            cout << "1";
+            patternoutput << "1";
         }
-        cout << endl;
-        patternoutput << endl;
+        else {
+            cout << "X";
+            patternoutput << "X";
+        }
     }
-    else if(type == "TRI") {
-        patternoutput << "PI: ";
-        for (i = 0;i<No_PI();++i) {
-            if(PIGate(i)->GetTri() == LOW) {
-                cout << "0";
-                patternoutput << "0";
-            }
-            else if(PIGate(i)->GetTri() == HIGH) {
-                cout << "1";
-                patternoutput << "1";
-            }
-            else {
-                cout << "X";
-                patternoutput << "X";
-            }
+    cout << " ";
+    patternoutput << " PO: ";
+    for (i = 0; i<No_PO(); ++i) { 
+        if(POGate(i)->GetValue() == S0) {
+            cout << "0";
+            patternoutput << "0";
         }
-        cout << " ";
-        patternoutput << " PO: ";
-        for (i = 0;i<No_PO();++i) { 
-            if(POGate(i)->GetTri() == LOW) {
-                cout << "0";
-                patternoutput << "0";
-            }
-            else if(POGate(i)->GetTri() == HIGH) {
-                cout << "1";
-                patternoutput << "1";
-            }
-            else {
-                cout << "X";
-                patternoutput << "X";
-            }
+        else if(POGate(i)->GetValue() == S1) {
+            cout << "1";
+            patternoutput << "1";
         }
-        cout << endl;
-        patternoutput << endl;
+        else {
+            cout << "X";
+            patternoutput << "X";
+        }
     }
+    cout << endl;
+    patternoutput << endl;
     return;
 }
 
