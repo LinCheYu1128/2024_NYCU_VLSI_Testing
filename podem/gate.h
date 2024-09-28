@@ -16,6 +16,7 @@ class GATE
         unsigned Level;
         VALUE Value;
         VALUE Value_t;
+        TRI Tri;
         bool Inversion;
         //Utility variable
         unsigned Count[2]; //used by Levelize(), FindStaticPivot(),PathSearch
@@ -76,7 +77,9 @@ class GATE
             }
             return true;
         }
-
+        // for assignment 2
+        void SetTri(TRI t) {Tri = t;}
+        TRI GetTri() { return Tri;}
         //for fault simulation
         void SetValue1() { WireValue[0].set(); }
         void SetValue1(bitset<PatternNum> &value) { WireValue[0] = value; }

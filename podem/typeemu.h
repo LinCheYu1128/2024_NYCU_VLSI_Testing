@@ -3,6 +3,7 @@
 #include <vector>
 #include <list>
 
+enum TRI {LOW, UNDEFINED0, UNDEFINED1, HIGH};
 enum VALUE {S0, S1, X, D, B, ILLIGAL};
 //good/faulty D = 1/0, B = D' = 0/1
 enum GATEFUNC {G_PI, G_PO, G_PPI, G_PPO, G_NOT, G_AND, G_NAND, G_OR, G_NOR, G_DFF, G_BUF, G_BAD };
@@ -12,6 +13,7 @@ enum FAULT_STATUS { UNKNOWN, DETECTED, REDUNDANT, ABORT };
 
 //Controlling Values
 const VALUE CV[] = {X, X, X, X, X, S0, S0, S1, S1, X, X, X};
+const TRI CV_TRI[] = {UNDEFINED0, UNDEFINED0, UNDEFINED0, UNDEFINED0, UNDEFINED0, LOW, LOW, HIGH, HIGH, UNDEFINED0, UNDEFINED0, UNDEFINED0};
 //Noncontrolling Values
 const VALUE NCV[] = {X, X, X, X, X, S1, S1, S0, S0, X, X, X};
 

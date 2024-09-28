@@ -3,6 +3,10 @@
 #include "circuit.h"
 #include "GetLongOpt.h"
 #include "ReadPattern.h"
+
+#include<sys/types.h>
+#include<unistd.h>
+
 using namespace std;
 
 // All defined in readcircuit.l
@@ -23,6 +27,8 @@ int SetupOption(int argc, char ** argv)
             "print this help summary", 0);
     option.enroll("logicsim", GetLongOpt::NoValue,
             "run logic simulation", 0);
+    option.enroll("mod_logicsim", GetLongOpt::NoValue,
+            "run modified logic simulation", 0);
     option.enroll("plogicsim", GetLongOpt::NoValue,
             "run parallel logic simulation", 0);
     option.enroll("fsim", GetLongOpt::NoValue,
@@ -58,6 +64,21 @@ int SetupOption(int argc, char ** argv)
         exit(0);
     }
     return optind;
+}
+
+void MemoryUsage()
+{
+    cout << "----------------- Memory usage ------------------" << endl;
+    int pid=(int) getpid();
+    cout << "pid: " << pid << endl;
+    cout << "size | resident | shared | text | lib | data | data" << endl;
+    char buf[1024];
+    sprintf(buf, "cat /proc/%d/statm",pid);
+    int ret = system(buf);
+    if(ret == -1) {
+        cout << "Error in system call" << endl;
+    }
+    cout << "-------------------------------------------------" << endl;
 }
 
 int main(int argc, char ** argv)
@@ -102,6 +123,13 @@ int main(int argc, char ** argv)
         //logic simulator
         Circuit.InitPattern(option.retrieve("input"));
         Circuit.LogicSimVectors();
+        MemoryUsage();
+    }
+    else if (option.retrieve("mod_logicsim")) {
+        //modified logic simulator
+        Circuit.InitPattern(option.retrieve("input"));
+        Circuit.ModLogicSimVectors();
+        MemoryUsage();
     }
     else if (option.retrieve("plogicsim")) {
         //parallel logic simulator
@@ -158,5 +186,6 @@ int main(int argc, char ** argv)
     time_end = clock();
     cout << "total CPU time = " << double(time_end - time_init)/CLOCKS_PER_SEC << endl;
     cout << endl;
+    
     return 0;
 }

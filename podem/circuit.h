@@ -132,8 +132,12 @@ class CIRCUIT
         void SchedulePPI();
         void LogicSimVectors();
         void LogicSim();
-        void PrintIO();
+        void PrintIO(string type);
         VALUE Evaluate(GATEPTR gptr);
+        // For assignment 2 (modified logic simulator)
+        void ModLogicSimVectors();
+        void ModLogicSim();
+        TRI ModEvaluate(GATEPTR gptr);
 
         //defined in atpg.cc
         void GenerateAllFaultList();
