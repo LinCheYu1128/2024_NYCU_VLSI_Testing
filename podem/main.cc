@@ -123,13 +123,13 @@ int main(int argc, char ** argv)
         //logic simulator
         Circuit.InitPattern(option.retrieve("input"));
         Circuit.LogicSimVectors();
-        MemoryUsage();
+        // MemoryUsage();
     }
     else if (option.retrieve("mod_logicsim")) {
         //modified logic simulator
         Circuit.InitPattern(option.retrieve("input"));
         Circuit.ModLogicSimVectors();
-        MemoryUsage();
+        // MemoryUsage();
     }
     else if (option.retrieve("plogicsim")) {
         //parallel logic simulator

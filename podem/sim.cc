@@ -298,35 +298,35 @@ void CIRCUIT::PrintIO()
     patternoutput << "PI: ";
     for (i = 0; i<No_PI(); ++i) { 
         if(PIGate(i)->GetValue() == S0) {
-            cout << "0";
+            // cout << "0";
             patternoutput << "0";
         }
         else if(PIGate(i)->GetValue() == S1) {
-            cout << "1";
+            // cout << "1";
             patternoutput << "1";
         }
         else {
-            cout << "X";
+            // cout << "X";
             patternoutput << "X";
         }
     }
-    cout << " ";
+    // cout << " ";
     patternoutput << " PO: ";
     for (i = 0; i<No_PO(); ++i) { 
         if(POGate(i)->GetValue() == S0) {
-            cout << "0";
+            // cout << "0";
             patternoutput << "0";
         }
         else if(POGate(i)->GetValue() == S1) {
-            cout << "1";
+            // cout << "1";
             patternoutput << "1";
         }
         else {
-            cout << "X";
+            // cout << "X";
             patternoutput << "X";
         }
     }
-    cout << endl;
+    // cout << endl;
     patternoutput << endl;
     return;
 }
