@@ -57,6 +57,8 @@ int SetupOption(int argc, char ** argv)
             "set the number of patterns to generate", 0);
     option.enroll("unknown", GetLongOpt::NoValue,
             "generate pattern with unknown", 0);
+    option.enroll("simulator", GetLongOpt::MandatoryValue,
+            "run simulator", 0);
     int optind = option.parse(argc, argv);
     if ( optind < 1 ) { exit(0); }
     if ( option.retrieve("help") ) {
@@ -164,6 +166,11 @@ int main(int argc, char ** argv)
     else if(option.retrieve("pattern")) {
         cout << "run pattern generation" << endl;
         Circuit.GeneratePattern(option.retrieve("input"), stoi(option.retrieve("num")));
+    }
+    else if(option.retrieve("simulator")) {
+        cout << "run simulator" << endl;
+        Circuit.InitPattern(option.retrieve("input"));
+        Circuit.GenerateCompiledCode();
     }
     else {
         Circuit.GenerateAllFaultList();

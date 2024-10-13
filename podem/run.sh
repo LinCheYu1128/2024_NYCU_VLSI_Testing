@@ -8,7 +8,7 @@ pattern_num=$3
 # Construct and run the command
 case $command_key in
     ass2_1)
-        /usr/bin/time -f "Average memory usage: %K \nMaximum memory usage: %M\n" -v ./atpg -logicsim -input ../input/TA_provide/${circuit_name}.input -output ../output/${circuit_name}.output ../circuits/iscas85/${circuit_name}.bench
+        /usr/bin/time -f "Average memory usage: %K \nMaximum memory usage: %M\n" ./atpg -logicsim -input ../input/${circuit_name}.input -output ../output/${circuit_name}.output ../circuits/iscas85/${circuit_name}.bench
         ;;
     ass2_2a)
         ./atpg -pattern -num ${pattern_num} -output ../input/${circuit_name}.input ../circuits/iscas85/${circuit_name}.bench   
@@ -21,6 +21,12 @@ case $command_key in
         ;;
     comp)
         python3 ../compare.py ../output/${circuit_name}.output ../output/${circuit_name}_m.output
+        ;;
+    ass3)
+        /usr/bin/time -f "Average memory usage: %K \nMaximum memory usage: %M\n" ./atpg -plogicsim -input ../input/${circuit_name}.input -output ../output/${circuit_name}_p.output ../circuits/iscas85/${circuit_name}.bench
+        ;;
+    ass3_c)
+        ./atpg -simulator ../simulator/${circuit_name}.cc -input ../input/${circuit_name}.input ../circuits/iscas85/${circuit_name}.bench
         ;;
     help)
         echo "For assignment 2:"

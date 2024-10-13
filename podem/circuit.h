@@ -43,6 +43,10 @@ class CIRCUIT
         ListofGate PropagateTree;
         ListofGateIte QueueIte;
 
+        // For assignment 3
+        unsigned evaluation_num;
+        ofstream CodeSimulator;
+        
     public:
         //Initialize netlist
         CIRCUIT(): MaxLevel(0), BackTrackLimit(10000) {
@@ -173,6 +177,12 @@ class CIRCUIT
 	void ParallelEvaluate(GATEPTR gptr);
 	void PrintParallelIOs(unsigned idx);
 	void ScheduleAllPIs();
+
+    // For assignment 3
+    //defined in codesim.cc for compiled code simulation
+    void GenerateCompiledCode();
+    void CompileCodeLogicSim();
+    void CompileCodeEvaluate(GATEPTR gptr);
 
 	//defined in stfsim.cc for single pattern single transition-fault simulation
 	void GenerateAllTFaultList();

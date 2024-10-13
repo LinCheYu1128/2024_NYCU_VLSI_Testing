@@ -1,0 +1,1 @@
+/usr/bin/time -f "Average memory usage: %K \nMaximum memory usage: %M\n" ./a.out

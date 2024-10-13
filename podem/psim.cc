@@ -9,8 +9,10 @@ extern GetLongOpt option;
 void CIRCUIT::ParallelLogicSimVectors()
 {
     cout << "Run Parallel Logic simulation" << endl;
+    patternoutput.open(option.retrieve("output"), ios::out);
     unsigned pattern_num(0);
     unsigned pattern_idx(0);
+    evaluation_num = 0;
     while(!Pattern.eof()){ 
 	for(pattern_idx=0; pattern_idx<PatternNum; pattern_idx++){
 	    if(!Pattern.eof()){ 
@@ -23,6 +25,17 @@ void CIRCUIT::ParallelLogicSimVectors()
 	ParallelLogicSim();
 	PrintParallelIOs(pattern_idx);
     }
+    patternoutput.close();
+    cout << "========================================" << endl;
+    cout << "Circular Name: " << Name << endl;
+    cout << "Total number of patterns: " << pattern_num << endl;
+    cout << "Packet size: " << PatternNum << endl;
+    cout << "Total number of evaluations: " << evaluation_num << endl;
+    double avg_eval = (double)evaluation_num / (double)pattern_num;
+    cout << "Average number of evaluations per pattern: " << avg_eval << endl;
+    double avg_eval_per_gate = avg_eval / (double)No_Gate() * 100;
+    cout << "Percentage of average evaluations over total gate: " << avg_eval_per_gate << "%" << endl;
+    cout << "========================================" << endl;
 }
 
 //Assign next input pattern to PI's idx'th bits
@@ -71,6 +84,7 @@ void CIRCUIT::ParallelEvaluate(GATEPTR gptr)
     register unsigned i;
     bitset<PatternNum> new_value1(gptr->Fanin(0)->GetValue1());
     bitset<PatternNum> new_value2(gptr->Fanin(0)->GetValue2());
+    evaluation_num += gptr->No_Fanin();
     switch(gptr->GetFunction()) {
         case G_AND:
         case G_NAND:
@@ -109,34 +123,52 @@ void CIRCUIT::PrintParallelIOs(unsigned idx)
 	    for (i = 0;i<No_PI();++i) { 
 		    if(PIGate(i)->GetWireValue(0, j)==0){ 
 			   if(PIGate(i)->GetWireValue(1, j)==1){
-	    			cout << "F";
+	    			// cout << "F";
+                    patternoutput << "F";
 			   }
-			   else cout << "0";
+			   else{
+                   // cout << "0";
+                   patternoutput << "0";
+                } 
 		    }
 		    else{
 			   if(PIGate(i)->GetWireValue(1, j)==1){
-	    			cout << "1";
+	    			// cout << "1";
+                    patternoutput << "1";
 			   }
-			   else cout << "X";
+			   else {
+                    // cout << "X";
+                    patternoutput << "2";
+               }
 		    }
 
 	    }
-	    cout << " ";
+	    // cout << " ";
+        patternoutput << " ";
 	    for (i = 0;i<No_PO();++i) { 
 		    if(POGate(i)->GetWireValue(0, j)==0){ 
 			   if(POGate(i)->GetWireValue(1, j)==1){
-	    			cout << "F";
+	    			// cout << "F";
+                    patternoutput << "F";
 			   }
-			   else cout << "0";
+			   else {
+                    // cout << "0";
+                    patternoutput << "0";
+               }
 		    }
 		    else{
 			   if(POGate(i)->GetWireValue(1, j)==1){
-	    			cout << "1";
+	    			// cout << "1";
+                    patternoutput << "1";
 			   }
-			   else cout << "X";
+			   else {
+                    // cout << "X";
+                    patternoutput << "2";
+               }
 		    }
 	    }
-	    cout << endl;
+	    // cout << endl;
+        patternoutput << endl;
     }
     return;
 }
