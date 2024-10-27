@@ -8,6 +8,100 @@ using namespace std;
 
 extern GetLongOpt option;
 
+void CIRCUIT::GenerateBridgingFaultList()
+{
+    cout << "Generate bridging fault list" << endl;
+    // Queue is used to store the gates in the same level
+    for(auto gptr : Netlist){
+        Queue[gptr->GetLevel()].push_back(gptr);
+    }
+
+    // Gnerate bridging fault list
+    register unsigned i;
+    FAULT *fptr;
+    GATE* gptr;
+    for(i = 0; i < MaxLevel; i++){
+        while(Queue[i].size() > 1){
+            gptr = Queue[i].front();
+            Queue[i].pop_front();
+            fptr = new FAULT(gptr, Queue[i].front(), X);
+            fptr->SetType(AND);
+            BFlist.push_back(fptr);
+            fptr = new FAULT(gptr, Queue[i].front(), X);
+            fptr->SetType(OR);
+            BFlist.push_back(fptr);
+        }
+        Queue[i].pop_front();
+    }
+
+    //copy Flist to undetected Flist (for fault simulation)
+    UBFlist = BFlist;
+    list<FAULT*>::iterator fite;
+    bfaultoutput.open(option.retrieve("output"), ios::out);
+    cout << "Bridging fault number:" << UBFlist.size() <<endl;
+    for (fite = UBFlist.begin(); fite != UBFlist.end();++fite) {
+        fptr = *fite;
+        if(fptr->GetType() == AND){
+            bfaultoutput << "(" << fptr->GetInputGate()->GetName() << ", " << fptr->GetOutputGate()->GetName() << ", AND)" << endl;
+            // cout << "(" << fptr->GetInputGate()->GetName() << ", " << fptr->GetOutputGate()->GetName() << ", AND)" << endl;
+        }
+        else{
+            bfaultoutput << "(" << fptr->GetInputGate()->GetName() << " , " << fptr->GetOutputGate()->GetName() << ", OR)" << endl;
+            // cout << "(" << fptr->GetInputGate()->GetName() << " , " << fptr->GetOutputGate()->GetName() << ", OR)" << endl;
+        }
+    }
+    bfaultoutput.close();
+    return;
+}
+
+void CIRCUIT::GenerateCheckPointFaultList()
+{
+    cout << "Generate checkpoint fault list" << endl;
+    register unsigned i, j;
+    GATEFUNC fun;
+    GATEPTR gptr, fanout;
+    FAULT *fptr;
+    for (i = 0;i<No_Gate();++i) {
+        gptr = Netlist[i]; fun = gptr->GetFunction();
+        if(fun == G_PI) {
+            //add stem stuck-at 0 fault to Flist
+            fptr = new FAULT(gptr, gptr, S0);
+            CheckPointFList.push_front(fptr);
+            //add stem stuck-at 1 fault to Flist
+            fptr = new FAULT(gptr, gptr, S1);
+            CheckPointFList.push_front(fptr);
+        } 
+
+        //add branch fault
+        if (gptr->No_Fanout() > 1) { 
+            for (j = 0;j< gptr->No_Fanout();++j) {
+                fanout = gptr->Fanout(j);
+                fptr = new FAULT(gptr, fanout, S0);
+                fptr->SetBranch(true);
+                CheckPointFList.push_front(fptr);
+                fptr = new FAULT(gptr, fanout, S1);
+                fptr->SetBranch(true);
+                CheckPointFList.push_front(fptr);
+            } //end all fanouts
+        } 
+    } //end all gates
+    //copy Flist to undetected Flist (for fault simulation)
+    UCheckPointFlist = CheckPointFList;
+    list<FAULT*>::iterator fite;
+    // cout << "Checkpoint fault number:" << CheckPointFList.size() <<endl;
+    for (fite = CheckPointFList.begin(); fite != CheckPointFList.end();++fite) {
+        fptr = *fite;
+        cout << fptr->GetInputGate()->GetName() << " -> " << fptr->GetOutputGate()->GetName() << " " << fptr->GetValue() << endl;
+    }
+    return;
+}
+
+void CIRCUIT::PercentageOfFault(){
+    cout << "Total fault number: " << Flist.size() << endl;
+    cout << "Checkpoint fault number: " << CheckPointFList.size() << endl;
+    cout << "Percentage of checkpoint fault: " << 100 * CheckPointFList.size() / (float)Flist.size() << "%" << endl;
+}
+
 //generate all stuck-at fault list
 void CIRCUIT::GenerateAllFaultList()
 {

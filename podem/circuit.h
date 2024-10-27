@@ -34,6 +34,12 @@ class CIRCUIT
         list<FAULT*> UFlist; //undetected fault list
         list<TFAULT*> TFlist; //collapsing fault list
         list<TFAULT*> UTFlist; //undetected fault list
+        list<FAULT*> CheckPointFList; //fault list for checkpoint
+        list<FAULT*> UCheckPointFlist; //undetected fault list for checkpoint
+        list<FAULT*> BFlist; //bridging fault list
+        list<FAULT*> UBFlist; //undetected bridging fault list
+        ofstream bfaultoutput;
+        
         unsigned MaxLevel;
         unsigned BackTrackLimit; //backtrack limit for Podem
         typedef list<GATE*> ListofGate;
@@ -145,7 +151,10 @@ class CIRCUIT
 
         //defined in atpg.cc
         void GenerateAllFaultList();
+        // For assignment 4
         void GenerateCheckPointFaultList();
+        void PercentageOfFault(); 
+        void GenerateBridgingFaultList();
         void GenerateFaultList();
         void Atpg();
         void SortFaninByLevel();

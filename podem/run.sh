@@ -28,6 +28,12 @@ case $command_key in
     ass3_c)
         ./atpg -simulator ../simulator/${circuit_name}.cc -input ../input/${circuit_name}.input ../circuits/iscas85/${circuit_name}.bench
         ;;
+    ass4_a)
+        ./atpg -check_point ../circuits/iscas85/${circuit_name}.bench
+        ;;
+    ass4_b)
+        ./atpg -bridging -output ../output/${circuit_name}.bfault ../circuits/iscas85/${circuit_name}.bench
+        ;;
     help)
         echo "For assignment 2:"
         echo "  Usage: ./run.sh ass2_1   <circuit_name>"

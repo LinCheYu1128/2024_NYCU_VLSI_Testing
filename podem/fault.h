@@ -12,6 +12,7 @@ class FAULT
         bool Branch; //fault is on branch
         unsigned EqvFaultNum; //equivalent fault number (includes itself)
         FAULT_STATUS Status;
+        FAULT_TYPE Type;
     public:
         FAULT(GATE* gptr, GATE* ogptr, VALUE value): Value(value), Input(gptr),
         Output(ogptr), Branch(false), EqvFaultNum(1), Status(UNKNOWN) {}
@@ -26,6 +27,8 @@ class FAULT
         unsigned GetEqvFaultNum() { return EqvFaultNum; }
         void SetStatus(FAULT_STATUS status) { Status = status; }
         FAULT_STATUS GetStatus() { return Status; }
+        void SetType(FAULT_TYPE type) { Type = type; }
+        FAULT_TYPE GetType() { return Type; }
 };
 
 

@@ -40,7 +40,7 @@ int SetupOption(int argc, char ** argv)
     option.enroll("input", GetLongOpt::MandatoryValue,
             "set the input pattern file", 0);
     option.enroll("output", GetLongOpt::MandatoryValue,
-            "set the output pattern file", 0);
+            "set the output file", 0);
     option.enroll("bt", GetLongOpt::OptionalValue,
             "set the backtrack limit", 0);
     option.enroll("ass0", GetLongOpt::NoValue,
@@ -59,6 +59,10 @@ int SetupOption(int argc, char ** argv)
             "generate pattern with unknown", 0);
     option.enroll("simulator", GetLongOpt::MandatoryValue,
             "run simulator", 0);
+    option.enroll("check_point", GetLongOpt::NoValue,
+            "generate check point fault list", 0);
+    option.enroll("bridging", GetLongOpt::NoValue,
+            "generate bridging fault list", 0);
     int optind = option.parse(argc, argv);
     if ( optind < 1 ) { exit(0); }
     if ( option.retrieve("help") ) {
@@ -171,6 +175,16 @@ int main(int argc, char ** argv)
         cout << "run simulator" << endl;
         Circuit.InitPattern(option.retrieve("input"));
         Circuit.GenerateCompiledCode();
+    }
+    else if(option.retrieve("check_point")) {
+        cout << "run check point fault list" << endl;
+        Circuit.GenerateCheckPointFaultList();
+        Circuit.GenerateAllFaultList();
+        Circuit.PercentageOfFault();
+    }
+    else if(option.retrieve("bridging")) {
+        cout << "run bridging fault list" << endl;
+        Circuit.GenerateBridgingFaultList();
     }
     else {
         Circuit.GenerateAllFaultList();
