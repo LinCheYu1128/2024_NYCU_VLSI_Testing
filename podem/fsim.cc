@@ -46,6 +46,7 @@ void CIRCUIT::FaultSimVectors()
     total_num = detected_num + undetected_num;
     cout.setf(ios::fixed);
     cout.precision(2);
+    cout << "PatternNum: " << PatternNum << endl;
     cout << "---------------------------------------" << endl;
     cout << "Test pattern number = " << pattern_num << endl;
     cout << "---------------------------------------" << endl;
@@ -269,7 +270,7 @@ bool CIRCUIT::CheckFaultyGate(FAULT* fptr)
 }
 
 //inject faulty value to the gate
-void CIRCUIT::InjectFaultValue(GATEPTR gptr, unsigned idx,VALUE value)
+void CIRCUIT:: InjectFaultValue(GATEPTR gptr, unsigned idx,VALUE value)
 {
     if (value == S1) {
         gptr->SetValue1(idx);

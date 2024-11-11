@@ -180,6 +180,12 @@ class CIRCUIT
         bool CheckFaultyGate(FAULT* fptr);
         void InjectFaultValue(GATEPTR gptr, unsigned idx,VALUE value);
 
+        // defined in bfsim.cc
+        // For assignment 5
+        void BridgeFaultSimVectors();
+        void BridgeFaultSim();
+        
+
 	//defined in psim.cc for parallel logic simulation
 	void ParallelLogicSimVectors();
 	void ParallelLogicSim();

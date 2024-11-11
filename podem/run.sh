@@ -34,6 +34,16 @@ case $command_key in
     ass4_b)
         ./atpg -bridging -output ../output/${circuit_name}.bfault ../circuits/iscas85/${circuit_name}.bench
         ;;
+    ass5_a)
+        ./atpg -output ../input/${circuit_name}.input ../circuits/iscas85/${circuit_name}.bench
+        ./atpg -check_point -output ../input/${circuit_name}.cp_input ../circuits/iscas85/${circuit_name}.bench
+        ;;
+    ass5_b)
+        ./atpg -fsim -input ../input/${circuit_name}.input ../circuits/iscas85/${circuit_name}.bench
+        ;;
+    ass5_c)
+        ./atpg -bridging_fsim -input ../input/${circuit_name}.input ../circuits/iscas85/${circuit_name}.bench
+        ;;
     help)
         echo "For assignment 2:"
         echo "  Usage: ./run.sh ass2_1   <circuit_name>"

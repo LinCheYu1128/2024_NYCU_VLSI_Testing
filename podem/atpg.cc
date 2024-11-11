@@ -87,12 +87,15 @@ void CIRCUIT::GenerateCheckPointFaultList()
     } //end all gates
     //copy Flist to undetected Flist (for fault simulation)
     UCheckPointFlist = CheckPointFList;
+    // Copy to Fault list to run aptg
+    Flist = CheckPointFList;
+    UFlist = Flist;
     list<FAULT*>::iterator fite;
     // cout << "Checkpoint fault number:" << CheckPointFList.size() <<endl;
-    for (fite = CheckPointFList.begin(); fite != CheckPointFList.end();++fite) {
-        fptr = *fite;
-        cout << fptr->GetInputGate()->GetName() << " -> " << fptr->GetOutputGate()->GetName() << " " << fptr->GetValue() << endl;
-    }
+    // for (fite = CheckPointFList.begin(); fite != CheckPointFList.end();++fite) {
+    //     fptr = *fite;
+    //     cout << fptr->GetInputGate()->GetName() << " -> " << fptr->GetOutputGate()->GetName() << " " << fptr->GetValue() << endl;
+    // }
     return;
 }
 

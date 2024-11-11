@@ -43,26 +43,34 @@ int SetupOption(int argc, char ** argv)
             "set the output file", 0);
     option.enroll("bt", GetLongOpt::OptionalValue,
             "set the backtrack limit", 0);
+    // Assignment 0
     option.enroll("ass0", GetLongOpt::NoValue,
             "print circuit info", 0);
+    // Assignment 1
     option.enroll("path", GetLongOpt::NoValue,
             "list and count all possible paths connecting the given PI and PO", 0);
     option.enroll("start", GetLongOpt::MandatoryValue,
             "set the starting PI", 0);
     option.enroll("end", GetLongOpt::MandatoryValue,
             "set the ending PO", 0);
+    // Assignment 2
     option.enroll("pattern", GetLongOpt::NoValue,
             "gen pattern generation", 0);
     option.enroll("num", GetLongOpt::MandatoryValue,
             "set the number of patterns to generate", 0);
     option.enroll("unknown", GetLongOpt::NoValue,
             "generate pattern with unknown", 0);
+    // Assignment 3
     option.enroll("simulator", GetLongOpt::MandatoryValue,
             "run simulator", 0);
+    // Assignment 4
     option.enroll("check_point", GetLongOpt::NoValue,
             "generate check point fault list", 0);
     option.enroll("bridging", GetLongOpt::NoValue,
             "generate bridging fault list", 0);
+    // Assignment 5
+    option.enroll("bridging_fsim", GetLongOpt::NoValue,
+            "run bridging fault simulation", 0);
     int optind = option.parse(argc, argv);
     if ( optind < 1 ) { exit(0); }
     if ( option.retrieve("help") ) {
@@ -158,36 +166,56 @@ int main(int argc, char ** argv)
         }
         Circuit.TFAtpg();
     }
+    // Assignment 0
     else if (option.retrieve("ass0")) {
         cout << "run assignment 0" << endl;
         Circuit.PrintAssignment0();
     }
+    // Assignment 1
     else if (option.retrieve("path")) {
         Circuit.MarkOutputGate();
         cout << "List all possible paths connecting " << option.retrieve("start") << " and " << option.retrieve("end") << endl;
         Circuit.GenerateAllPaths(option.retrieve("start"), option.retrieve("end"));
     }
+    // Assignment 2
     else if(option.retrieve("pattern")) {
         cout << "run pattern generation" << endl;
         Circuit.GeneratePattern(option.retrieve("input"), stoi(option.retrieve("num")));
     }
+    // Assignment 3
     else if(option.retrieve("simulator")) {
         cout << "run simulator" << endl;
         Circuit.InitPattern(option.retrieve("input"));
         Circuit.GenerateCompiledCode();
     }
-    else if(option.retrieve("check_point")) {
-        cout << "run check point fault list" << endl;
-        Circuit.GenerateCheckPointFaultList();
-        Circuit.GenerateAllFaultList();
-        Circuit.PercentageOfFault();
-    }
+    // Assignment 4
     else if(option.retrieve("bridging")) {
         cout << "run bridging fault list" << endl;
         Circuit.GenerateBridgingFaultList();
     }
+    // Assignment 5
+    else if(option.retrieve("bridging_fsim")) {
+        cout << "run bridging fault simulation" << endl;
+        Circuit.GenerateBridgingFaultList();
+        Circuit.SortFaninByLevel();
+        Circuit.MarkOutputGate();
+        Circuit.InitPattern(option.retrieve("input"));
+        Circuit.BridgeFaultSimVectors();
+    }
     else {
-        Circuit.GenerateAllFaultList();
+        // Assignment 4 generate checkpoint fault list and print percentage of fault
+        // Assignment 5 use check_point fault list to run ATPG
+        if(option.retrieve("check_point")){
+            Circuit.GenerateCheckPointFaultList();
+            if(!option.retrieve("output")){
+                Circuit.GenerateAllFaultList();
+                Circuit.PercentageOfFault();
+                goto end;
+            }
+        }
+        else{
+            Circuit.GenerateAllFaultList();
+        }
         Circuit.SortFaninByLevel();
         Circuit.MarkOutputGate();
         if (option.retrieve("fsim")) {
@@ -204,6 +232,7 @@ int main(int argc, char ** argv)
             Circuit.Atpg();
         }
     }
+    end:
     time_end = clock();
     cout << "total CPU time = " << double(time_end - time_init)/CLOCKS_PER_SEC << endl;
     cout << endl;
