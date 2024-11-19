@@ -4,6 +4,7 @@
 command_key=$1
 circuit_name=$2
 pattern_num=$3
+backtrack=$1
 
 # Construct and run the command
 case $command_key in
@@ -43,6 +44,9 @@ case $command_key in
         ;;
     ass5_c)
         ./atpg -bridging_fsim -input ../input/${circuit_name}.input ../circuits/iscas85/${circuit_name}.bench
+        ;;
+    ass6_a)
+        ./atpg -random_pattern -bt $backtrack -output ../input/b17.input ../circuits/b17.bench
         ;;
     help)
         echo "For assignment 2:"

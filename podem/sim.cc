@@ -270,6 +270,7 @@ void PATTERN::GenerateRandomPattern(unsigned num, vector<GATE*> GATElist, string
         patternoutput << TAG << " " << GATElist[j]->GetName() << " ";
     }
     patternoutput << endl;
+    cout << "size: " << GATElist.size() << endl;
     for (unsigned i = 0;i < num; ++i) {
         for (unsigned j = 0;j < GATElist.size();++j) {
             int temp;

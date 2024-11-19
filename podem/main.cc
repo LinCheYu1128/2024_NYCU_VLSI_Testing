@@ -71,6 +71,9 @@ int SetupOption(int argc, char ** argv)
     // Assignment 5
     option.enroll("bridging_fsim", GetLongOpt::NoValue,
             "run bridging fault simulation", 0);
+    // Assignment 6
+    option.enroll("random_pattern", GetLongOpt::NoValue,
+            "generate random pattern", 0);
     int optind = option.parse(argc, argv);
     if ( optind < 1 ) { exit(0); }
     if ( option.retrieve("help") ) {
@@ -201,6 +204,11 @@ int main(int argc, char ** argv)
         Circuit.MarkOutputGate();
         Circuit.InitPattern(option.retrieve("input"));
         Circuit.BridgeFaultSimVectors();
+    }
+    // Assignment 6
+    else if(option.retrieve("random_pattern")) {
+        cout << "run random pattern generation" << endl;
+        Circuit.GeneratePattern(option.retrieve("input"), 1000);
     }
     else {
         // Assignment 4 generate checkpoint fault list and print percentage of fault
