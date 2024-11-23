@@ -8,6 +8,25 @@ using namespace std;
 
 extern GetLongOpt option;
 
+void CIRCUIT::GenerateC17FaultList()
+{
+    cout << "Generate c17 fault list" << endl;
+    FAULT *fptr;
+    GATE* gptr;
+    for(unsigned i = 0; i < No_Gate(); i++){
+        if(Gate(i)->GetName() == "n60"){
+            gptr = Gate(i);
+            fptr = new FAULT(gptr, gptr, S1);
+            Flist.push_front(fptr);
+        }
+        else if(Gate(i)->GetName() == "net17"){
+            gptr = Gate(i);
+            fptr = new FAULT(gptr, gptr, S0);
+            Flist.push_front(fptr);
+        }
+    }
+}
+
 void CIRCUIT::GenerateBridgingFaultList()
 {
     cout << "Generate bridging fault list" << endl;
@@ -179,9 +198,9 @@ void CIRCUIT::Atpg()
                 ++pattern_num;
                 //run fault simulation for fault dropping
                 for (i = 0;i < PIlist.size();++i) { 
-			ScheduleFanout(PIlist[i]); 
-                        if (option.retrieve("output")){ OutputStrm << PIlist[i]->GetValue();}
-		}
+                    ScheduleFanout(PIlist[i]); 
+                    if (option.retrieve("output")){ OutputStrm << PIlist[i]->GetValue();}
+		        }
                 if (option.retrieve("output")){ OutputStrm << endl;}
                 for (i = PIlist.size();i<Netlist.size();++i) { Netlist[i]->SetValue(X); }
                 LogicSim();
@@ -227,6 +246,7 @@ void CIRCUIT::Atpg()
     cout << "---------------------------------------" << endl;
     cout << "Test pattern number = " << pattern_num << endl;
     cout << "Total backtrack number = " << total_backtrack_num << endl;
+    cout << "Backtrack limit = " << BackTrackLimit << endl;
     cout << "---------------------------------------" << endl;
     cout << "Total fault number = " << total_num << endl;
     cout << "Detected fault number = " << detected_num << endl;
@@ -253,6 +273,7 @@ void CIRCUIT::Atpg()
 //FALSE: abort
 ATPG_STATUS CIRCUIT::Podem(FAULT* fptr, unsigned &total_backtrack_num)
 {
+    if(print_pt){cout << "---------------------- Run PODEM ------------------------" << endl;}
     unsigned i, backtrack_num(0);
     GATEPTR pi_gptr(0), decision_gptr(0);
     ATPG_STATUS status;
@@ -260,6 +281,7 @@ ATPG_STATUS CIRCUIT::Podem(FAULT* fptr, unsigned &total_backtrack_num)
     //set all values as unknown
     for (i = 0;i<Netlist.size();++i) { Netlist[i]->SetValue(X); }
     //mark propagate paths
+    if(print_pt){ cout << "Fault: " << fptr->GetInputGate()->GetName() << " " << fptr->GetValue() << endl;}
     MarkPropagateTree(fptr->GetOutputGate());
     //propagate fault free value
     status = SetUniqueImpliedValue(fptr);
@@ -284,6 +306,7 @@ ATPG_STATUS CIRCUIT::Podem(FAULT* fptr, unsigned &total_backtrack_num)
     while(backtrack_num < BackTrackLimit && status == FALSE) {
         //search possible PI decision
         pi_gptr = TestPossible(fptr);
+        if(print_pt){cout << "  PI decision: " << pi_gptr->GetName() << " " << pi_gptr->PrintValue() << " Backtrack number: " << backtrack_num << endl;        }
         if (pi_gptr) { //decision found
             ScheduleFanout(pi_gptr);
             //push to decision tree

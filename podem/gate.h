@@ -61,6 +61,16 @@ class GATE
         void ChangeFanout(int i, GATE* g) {Output_list[i] = g;}
         unsigned GetLevel() { return Level;}
         VALUE GetValue() { return Value;}
+        string PrintValue() {
+            switch (Value) {
+                case S0: return " 0"; 
+                case S1: return " 1"; 
+                case X: return " X"; 
+                case D: return " 1/0"; 
+                case B: return " 0/1"; 
+                default: return " Illigal value";
+            }
+        };
         VALUE GetValue_t() { return Value_t;}
         void SetInversion(){Inversion = true;}
         void UnSetInversion(){Inversion = false;}

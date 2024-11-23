@@ -52,6 +52,9 @@ class CIRCUIT
         // For assignment 3
         unsigned evaluation_num;
         ofstream CodeSimulator;
+
+        // For assignment 6
+        bool print_pt;
         
     public:
         //Initialize netlist
@@ -127,6 +130,9 @@ class CIRCUIT
             Pattern.GenerateRandomPattern(num, PIlist, "PI");
         }
 
+        // For assignment 6
+        void SetPrintPropagateTree(bool b) { print_pt = b; }
+
         //defined in circuit.cc
         void Levelize();
         void FanoutList();
@@ -155,6 +161,8 @@ class CIRCUIT
         void GenerateCheckPointFaultList();
         void PercentageOfFault(); 
         void GenerateBridgingFaultList();
+        // For assignment 6
+        void GenerateC17FaultList();
         void GenerateFaultList();
         void Atpg();
         void SortFaninByLevel();

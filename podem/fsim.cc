@@ -46,9 +46,9 @@ void CIRCUIT::FaultSimVectors()
     total_num = detected_num + undetected_num;
     cout.setf(ios::fixed);
     cout.precision(2);
-    cout << "PatternNum: " << PatternNum << endl;
     cout << "---------------------------------------" << endl;
     cout << "Test pattern number = " << pattern_num << endl;
+    cout << "Parallel PatternNum: " << PatternNum << endl;
     cout << "---------------------------------------" << endl;
     cout << "Total fault number = " << total_num << endl;
     cout << "Detected fault number = " << detected_num << endl;

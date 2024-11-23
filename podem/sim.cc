@@ -40,8 +40,10 @@ void CIRCUIT::LogicSim()
                 gptr->SetValue(new_value);
                 ScheduleFanout(gptr);
             }
+            if(print_pt){cout << "  " << gptr->GetName() << " " << gptr->PrintValue();}
         }
     }
+    if(print_pt){cout << endl;}
     return;
 }
 

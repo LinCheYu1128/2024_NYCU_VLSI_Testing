@@ -72,8 +72,12 @@ int SetupOption(int argc, char ** argv)
     option.enroll("bridging_fsim", GetLongOpt::NoValue,
             "run bridging fault simulation", 0);
     // Assignment 6
+    option.enroll("c17_proc", GetLongOpt::NoValue,
+            "print c17 procedure", 0);
     option.enroll("random_pattern", GetLongOpt::NoValue,
             "generate random pattern", 0);
+    option.enroll("bridging_atpg", GetLongOpt::NoValue,
+            "run bridging fault ATPG", 0);
     int optind = option.parse(argc, argv);
     if ( optind < 1 ) { exit(0); }
     if ( option.retrieve("help") ) {
@@ -205,14 +209,37 @@ int main(int argc, char ** argv)
         Circuit.InitPattern(option.retrieve("input"));
         Circuit.BridgeFaultSimVectors();
     }
-    // Assignment 6
+    // Assignment 6_c
+    else if(option.retrieve("c17_proc")) {
+        cout << "print procedure for c17.bench with net17 stuck-at-0 and n60 stuck-at-1" << endl;
+        Circuit.SetPrintPropagateTree(true);
+        Circuit.GenerateC17FaultList();
+        Circuit.SortFaninByLevel();
+        Circuit.MarkOutputGate();
+        Circuit.Atpg();
+    }
+    // Assignment 6_d
     else if(option.retrieve("random_pattern")) {
         cout << "run random pattern generation" << endl;
-        Circuit.GeneratePattern(option.retrieve("input"), 1000);
+        // Circuit.GeneratePattern(option.retrieve("input"), 1000);
+        Circuit.GenerateAllFaultList();
+        Circuit.SortFaninByLevel();
+        Circuit.MarkOutputGate();
+        Circuit.Atpg();
+    } 
+    // Assignment 6_e
+    else if(option.retrieve("bridging_atpg")) {
+        cout << "run bridging fault ATPG" << endl;
+        Circuit.GenerateBridgingFaultList();
+        Circuit.SortFaninByLevel();
+        Circuit.MarkOutputGate();
+        Circuit.Atpg();
     }
     else {
         // Assignment 4 generate checkpoint fault list and print percentage of fault
         // Assignment 5 use check_point fault list to run ATPG
+        // Assignment 6_a compare different backtrack limit on ATPG
+        // Assignment 6_b compare check_point fault list 和 all fault list on ATPG(用checkpoint fault list跑ATPG，然后再用all fault list跑fsim)
         if(option.retrieve("check_point")){
             Circuit.GenerateCheckPointFaultList();
             if(!option.retrieve("output")){
@@ -231,7 +258,6 @@ int main(int argc, char ** argv)
             Circuit.InitPattern(option.retrieve("input"));
             Circuit.FaultSimVectors();
         }
-
         else {
             if (option.retrieve("bt")) {
                 Circuit.SetBackTrackLimit(atoi(option.retrieve("bt")));

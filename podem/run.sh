@@ -4,7 +4,7 @@
 command_key=$1
 circuit_name=$2
 pattern_num=$3
-backtrack=$1
+backtrack=$2
 
 # Construct and run the command
 case $command_key in
@@ -46,19 +46,34 @@ case $command_key in
         ./atpg -bridging_fsim -input ../input/${circuit_name}.input ../circuits/iscas85/${circuit_name}.bench
         ;;
     ass6_a)
-        ./atpg -random_pattern -bt $backtrack -output ../input/b17.input ../circuits/b17.bench
+        ./atpg -bt ${backtrack} -output ../input/b17.input ../circuits/b17.bench 
         ;;
-    help)
-        echo "For assignment 2:"
-        echo "  Usage: ./run.sh ass2_1   <circuit_name>"
-        echo "  Usage: ./run.sh ass2_2a  <circuit_name> <pattern_num>"
-        echo "  Usage: ./run.sh ass2_2aU <circuit_name> <pattern_num>"
-        echo "  Usage: ./run.sh ass2_2b  <circuit_name>"
-        echo "  Usage: ./run.sh comp     <circuit_name>"
+    ass6_b1)
+        ./atpg -bt 1 -check_point -output ../input/b17.cp_input ../circuits/b17.bench
+        ./atpg -fsim -input ../input/b17.cp_input ../circuits/b17.bench
+        ;;
+    ass6_b2)
+        ./atpg -bt 1 -output ../input/b17.input ../circuits/b17.bench
+        ./atpg -fsim -input ../input/b17.input ../circuits/b17.bench
+        ;;
+    ass6_c)
+        ./atpg -c17_proc -output ../input/c17.input ../circuits/iscas85/c17.bench
+        ;;
+    ass6_d)
+        ./atpg -random_pattern -output ../input/b17.input ../circuits/b17.bench
+        ;;
+    b17)
+        ./atpg -ass0 ../circuits/b17.bench
+        ;;
+    s35932_com)
+        ./atpg -ass0 ../circuits/iscas89_com/s35932_com.bench
+        ;;
+    test)
+        # ./atpg -check_point ../circuits/iscas89_com/s38584_com.bench
+        ./atpg -check_point ../circuits/b17.bench
         ;;
     *)
         echo "Unknown command key: $command_key"
-        echo "Available keys: ass2_1, ass2_2a, ass2_2aU, ass2_2b, help"
         exit 1
         ;;
 esac
