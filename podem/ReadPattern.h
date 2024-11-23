@@ -24,7 +24,7 @@ class PATTERN
             return (patterninput.eof());
         }
         void ModReadNextPattern();
-    void GenerateRandomPattern(unsigned num, vector<GATE*> GATElist, string TAG);
+    void GenerateRandomPattern(char* InFileName, unsigned num, vector<GATE*> GATElist, string TAG);
 
 };
 #endif

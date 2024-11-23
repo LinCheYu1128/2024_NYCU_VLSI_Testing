@@ -265,14 +265,13 @@ void PATTERN::ReadNextPattern()
 }
 
 
-void PATTERN::GenerateRandomPattern(unsigned num, vector<GATE*> GATElist, string TAG)
+void PATTERN::GenerateRandomPattern(char* InFileName, unsigned num, vector<GATE*> GATElist, string TAG)
 {
-    patternoutput.open(option.retrieve("output"), ios::out);
+    patternoutput.open(InFileName, ios::out);
     for (unsigned j = 0;j < GATElist.size();++j) {
         patternoutput << TAG << " " << GATElist[j]->GetName() << " ";
     }
     patternoutput << endl;
-    cout << "size: " << GATElist.size() << endl;
     for (unsigned i = 0;i < num; ++i) {
         for (unsigned j = 0;j < GATElist.size();++j) {
             int temp;

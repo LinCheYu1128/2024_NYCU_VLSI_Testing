@@ -69,8 +69,7 @@ case $command_key in
         ./atpg -ass0 ../circuits/iscas89_com/s35932_com.bench
         ;;
     test)
-        # ./atpg -check_point ../circuits/iscas89_com/s38584_com.bench
-        ./atpg -check_point ../circuits/b17.bench
+        ./atpg -random_pattern -output ../input/c7552.input ../circuits/iscas85/c7552.bench
         ;;
     *)
         echo "Unknown command key: $command_key"

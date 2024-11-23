@@ -187,7 +187,7 @@ int main(int argc, char ** argv)
     // Assignment 2
     else if(option.retrieve("pattern")) {
         cout << "run pattern generation" << endl;
-        Circuit.GeneratePattern(option.retrieve("input"), stoi(option.retrieve("num")));
+        Circuit.GeneratePattern(option.retrieve("output"), stoi(option.retrieve("num")));
     }
     // Assignment 3
     else if(option.retrieve("simulator")) {
@@ -221,10 +221,26 @@ int main(int argc, char ** argv)
     // Assignment 6_d
     else if(option.retrieve("random_pattern")) {
         cout << "run random pattern generation" << endl;
-        // Circuit.GeneratePattern(option.retrieve("input"), 1000);
         Circuit.GenerateAllFaultList();
         Circuit.SortFaninByLevel();
         Circuit.MarkOutputGate();
+        Circuit.GeneratePattern(option.retrieve("output"), 1000);
+        Circuit.InitPattern(option.retrieve("output"));
+
+        int counter = 0;
+        while(Circuit.GetCoverage() < 90.0) {    
+            Circuit.FaultSimVectors();
+            counter++;
+            // cout << "Coverage = " << Circuit.GetCoverage() << "%" << endl;
+            if(Circuit.GetCoverage() >= 90.0) {
+                cout << "Coverage reached 90% with pattern num = " << counter << endl;
+                break;
+            }
+            if(counter > 1000) {
+                cout << "Can't reach 100% coverage with random pattern (" << Circuit.GetCoverage() << "/90)" << endl;
+                break;
+            }
+        }
         Circuit.Atpg();
     } 
     // Assignment 6_e

@@ -10,18 +10,30 @@ extern GetLongOpt option;
 // fault simulation test patterns
 void CIRCUIT::FaultSimVectors()
 {
-    cout << "Run stuck-at fault simulation" << endl;
-    unsigned pattern_num(0);
+    if(!option.retrieve("random_pattern")){cout << "Run stuck-at fault simulation" << endl;}
+    // unsigned pattern_num(0);
     if(!Pattern.eof()){ // Readin the first vector
-        while(!Pattern.eof()){
+        // read one pattern from the pattern file until coverage reach 90%
+        if(option.retrieve("random_pattern")){
             ++pattern_num;
             Pattern.ReadNextPattern();
-            //fault-free simulation
             SchedulePI();
             LogicSim();
-            //single pattern parallel fault simulation
             FaultSim();
         }
+        // read all patterns from the pattern file
+        else{
+            while(!Pattern.eof()){
+                ++pattern_num;
+                Pattern.ReadNextPattern();
+                //fault-free simulation
+                SchedulePI();
+                LogicSim();
+                //single pattern parallel fault simulation
+                FaultSim();
+            }
+        }
+        
     }
 
     //compute fault coverage
@@ -44,23 +56,27 @@ void CIRCUIT::FaultSimVectors()
         }
     }
     total_num = detected_num + undetected_num;
-    cout.setf(ios::fixed);
-    cout.precision(2);
-    cout << "---------------------------------------" << endl;
-    cout << "Test pattern number = " << pattern_num << endl;
-    cout << "Parallel PatternNum: " << PatternNum << endl;
-    cout << "---------------------------------------" << endl;
-    cout << "Total fault number = " << total_num << endl;
-    cout << "Detected fault number = " << detected_num << endl;
-    cout << "Undetected fault number = " << undetected_num << endl;
-    cout << "---------------------------------------" << endl;
-    cout << "Equivalent fault number = " << Flist.size() << endl;
-    cout << "Equivalent detected fault number = " << eqv_detected_num << endl; 
-    cout << "Equivalent undetected fault number = " << eqv_undetected_num << endl; 
-    cout << "---------------------------------------" << endl;
-    cout << "Fault Coverge = " << 100*detected_num/double(total_num) << "%" << endl;
-    cout << "Equivalent FC = " << 100*eqv_detected_num/double(Flist.size()) << "%" << endl;
-    cout << "---------------------------------------" << endl;
+    coverage = 100*detected_num/double(total_num);
+    if(!option.retrieve("random_pattern") || coverage >= 90.0){
+        cout.setf(ios::fixed);
+        cout.precision(2);
+        cout << "---------------------------------------" << endl;
+        cout << "Test pattern number = " << pattern_num << endl;
+        cout << "Parallel PatternNum: " << PatternNum << endl;
+        cout << "---------------------------------------" << endl;
+        cout << "Total fault number = " << total_num << endl;
+        cout << "Detected fault number = " << detected_num << endl;
+        cout << "Undetected fault number = " << undetected_num << endl;
+        cout << "---------------------------------------" << endl;
+        cout << "Equivalent fault number = " << Flist.size() << endl;
+        cout << "Equivalent detected fault number = " << eqv_detected_num << endl; 
+        cout << "Equivalent undetected fault number = " << eqv_undetected_num << endl; 
+        cout << "---------------------------------------" << endl;
+        cout << "Fault Coverge = " << 100*detected_num/double(total_num) << "%" << endl;
+        cout << "Equivalent FC = " << 100*eqv_detected_num/double(Flist.size()) << "%" << endl;
+        cout << "---------------------------------------" << endl;
+    }
+    
     return;
 }
 

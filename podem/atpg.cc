@@ -164,7 +164,7 @@ void CIRCUIT::GenerateAllFaultList()
 void CIRCUIT::Atpg()
 {
     cout << "Run stuck-at fault ATPG" << endl;
-    unsigned i, total_backtrack_num(0), pattern_num(0);
+    unsigned i, total_backtrack_num(0);
     ATPG_STATUS status;
     FAULT* fptr;
     list<FAULT*>::iterator fite;
@@ -172,7 +172,12 @@ void CIRCUIT::Atpg()
     //Prepare the output files
     ofstream OutputStrm;
     if (option.retrieve("output")){
-        OutputStrm.open((char*)option.retrieve("output"),ios::out);
+        if(option.retrieve("random_pattern")){
+            OutputStrm.open((char*)option.retrieve("output"),ios::app);
+        }
+        else{
+            OutputStrm.open((char*)option.retrieve("output"),ios::out);
+        }
         if(!OutputStrm){
               cout << "Unable to open output file: "
                    << option.retrieve("output") << endl;
@@ -180,13 +185,16 @@ void CIRCUIT::Atpg()
               exit(-1);
         }
     }
-
-    if (option.retrieve("output")){
-	    for (i = 0;i<PIlist.size();++i) {
-		OutputStrm << "PI " << PIlist[i]->GetName() << " ";
-	    }
-	    OutputStrm << endl;
+    // if random pattern first then dont need to write PI
+    if(!option.retrieve("random_pattern")){
+        if (option.retrieve("output")){
+            for (i = 0;i<PIlist.size();++i) {
+            OutputStrm << "PI " << PIlist[i]->GetName() << " ";
+            }
+            OutputStrm << endl;
+        }    
     }
+    
     for (fite = Flist.begin(); fite != Flist.end();++fite) {
         fptr = *fite;
         if (fptr->GetStatus() == DETECTED) { continue; }

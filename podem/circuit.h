@@ -55,6 +55,8 @@ class CIRCUIT
 
         // For assignment 6
         bool print_pt;
+        double coverage;
+        unsigned pattern_num;
         
     public:
         //Initialize netlist
@@ -64,6 +66,8 @@ class CIRCUIT
             POlist.reserve(512);
             PPIlist.reserve(2048);
             PPOlist.reserve(2048);
+            coverage = 0;
+            pattern_num = 0;
         }
         CIRCUIT(unsigned NO_GATE, unsigned NO_PI = 128, unsigned NO_PO = 512,
                 unsigned NO_PPI = 2048, unsigned NO_PPO = 2048) {
@@ -72,6 +76,8 @@ class CIRCUIT
             POlist.reserve(NO_PO);
             PPIlist.reserve(NO_PPI);
             PPOlist.reserve(NO_PPO);
+            coverage = 0;
+            pattern_num = 0;
         }
         ~CIRCUIT() {
             for (unsigned i = 0;i<Netlist.size();++i) { delete Netlist[i]; }
@@ -127,11 +133,12 @@ class CIRCUIT
 
         // For assignment 2
         void GeneratePattern(const char *pattern, int num) {
-            Pattern.GenerateRandomPattern(num, PIlist, "PI");
+            Pattern.GenerateRandomPattern(const_cast<char *>(pattern), num, PIlist, "PI");
         }
 
         // For assignment 6
         void SetPrintPropagateTree(bool b) { print_pt = b; }
+        double GetCoverage() { return coverage; }
 
         //defined in circuit.cc
         void Levelize();
