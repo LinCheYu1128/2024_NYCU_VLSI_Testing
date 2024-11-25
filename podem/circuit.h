@@ -171,6 +171,8 @@ class CIRCUIT
         // For assignment 6
         void GenerateC17FaultList();
         void BridgeFaultAtpg();
+        ATPG_STATUS BridgePodem(FAULT* fptr, unsigned &total_backtrack_num);
+        bool BridgeFaultEvaluate(FAULT* fptr);
 
         void GenerateFaultList();
         void Atpg();

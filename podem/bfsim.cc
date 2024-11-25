@@ -8,7 +8,7 @@ extern GetLongOpt option;
 // fault simulation test patterns
 void CIRCUIT::BridgeFaultSimVectors()
 {
-    cout << "Run stuck-at bridging fault simulation" << endl;
+    cout << "Run bridging fault simulation" << endl;
     unsigned pattern_num(0);
     if(!Pattern.eof()){ // Readin the first vector
         while(!Pattern.eof()){

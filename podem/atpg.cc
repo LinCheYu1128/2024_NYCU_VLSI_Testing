@@ -27,52 +27,6 @@ void CIRCUIT::GenerateC17FaultList()
     }
 }
 
-void CIRCUIT::GenerateBridgingFaultList()
-{
-    cout << "Generate bridging fault list" << endl;
-    // Queue is used to store the gates in the same level
-    for(auto gptr : Netlist){
-        Queue[gptr->GetLevel()].push_back(gptr);
-    }
-
-    // Gnerate bridging fault list
-    register unsigned i;
-    FAULT *fptr;
-    GATE* gptr;
-    for(i = 0; i < MaxLevel; i++){
-        while(Queue[i].size() > 1){
-            gptr = Queue[i].front();
-            Queue[i].pop_front();
-            fptr = new FAULT(gptr, Queue[i].front(), X);
-            fptr->SetType(AND);
-            BFlist.push_back(fptr);
-            fptr = new FAULT(gptr, Queue[i].front(), X);
-            fptr->SetType(OR);
-            BFlist.push_back(fptr);
-        }
-        Queue[i].pop_front();
-    }
-
-    //copy Flist to undetected Flist (for fault simulation)
-    UBFlist = BFlist;
-    list<FAULT*>::iterator fite;
-    bfaultoutput.open(option.retrieve("output"), ios::out);
-    cout << "Bridging fault number:" << UBFlist.size() <<endl;
-    for (fite = UBFlist.begin(); fite != UBFlist.end();++fite) {
-        fptr = *fite;
-        if(fptr->GetType() == AND){
-            bfaultoutput << "(" << fptr->GetInputGate()->GetName() << ", " << fptr->GetOutputGate()->GetName() << ", AND)" << endl;
-            // cout << "(" << fptr->GetInputGate()->GetName() << ", " << fptr->GetOutputGate()->GetName() << ", AND)" << endl;
-        }
-        else{
-            bfaultoutput << "(" << fptr->GetInputGate()->GetName() << " , " << fptr->GetOutputGate()->GetName() << ", OR)" << endl;
-            // cout << "(" << fptr->GetInputGate()->GetName() << " , " << fptr->GetOutputGate()->GetName() << ", OR)" << endl;
-        }
-    }
-    bfaultoutput.close();
-    return;
-}
-
 void CIRCUIT::GenerateCheckPointFaultList()
 {
     cout << "Generate checkpoint fault list" << endl;
@@ -160,113 +114,6 @@ void CIRCUIT::GenerateAllFaultList()
     return;
 }
 
-void CIRCUIT::BridgeFaultAtpg()
-{
-    cout << "Run stuck-at bridging fault ATPG" << endl;
-    unsigned i, total_backtrack_num(0);
-    ATPG_STATUS status;
-    FAULT* fptr;
-    list<FAULT*>::iterator fite;
-    
-    //Prepare the output files
-    ofstream OutputStrm;
-    if (option.retrieve("output")){
-        OutputStrm.open((char*)option.retrieve("output"),ios::out);
-        if(!OutputStrm){
-              cout << "Unable to open output file: "
-                   << option.retrieve("output") << endl;
-              cout << "Unsaved output!\n";
-              exit(-1);
-        }
-    }
-    
-    if (option.retrieve("output")){
-        for (i = 0;i<PIlist.size();++i) {
-        OutputStrm << "PI " << PIlist[i]->GetName() << " ";
-        }
-        OutputStrm << endl;
-    }    
-    
-    for (fite = Flist.begin(); fite != Flist.end();++fite) {
-        fptr = *fite;
-        if (fptr->GetStatus() == DETECTED) { continue; }
-        //run podem algorithm
-        status = Podem(fptr, total_backtrack_num);
-        switch (status) {
-            case TRUE:
-                fptr->SetStatus(DETECTED);
-                ++pattern_num;
-                //run fault simulation for fault dropping
-                for (i = 0;i < PIlist.size();++i) { 
-                    ScheduleFanout(PIlist[i]); 
-                    if (option.retrieve("output")){ OutputStrm << PIlist[i]->GetValue();}
-		        }
-                if (option.retrieve("output")){ OutputStrm << endl;}
-                for (i = PIlist.size();i<Netlist.size();++i) { Netlist[i]->SetValue(X); }
-                LogicSim();
-                BridgeFaultSim();
-                break;
-            case CONFLICT:
-                fptr->SetStatus(REDUNDANT);
-                break;
-            case FALSE:
-                fptr->SetStatus(ABORT);
-                break;
-        }
-    } //end all faults
-
-    //compute fault coverage
-    unsigned total_num(0);
-    unsigned abort_num(0), redundant_num(0), detected_num(0);
-    unsigned eqv_abort_num(0), eqv_redundant_num(0), eqv_detected_num(0);
-    for (fite = Flist.begin();fite!=Flist.end();++fite) {
-        fptr = *fite;
-        switch (fptr->GetStatus()) {
-            case DETECTED:
-                ++eqv_detected_num;
-                detected_num += fptr->GetEqvFaultNum();
-                break;
-            case REDUNDANT:
-                ++eqv_redundant_num;
-                redundant_num += fptr->GetEqvFaultNum();
-                break;
-            case ABORT:
-                ++eqv_abort_num;
-                abort_num += fptr->GetEqvFaultNum();
-                break;
-            default:
-                cerr << "Unknown fault type exists" << endl;
-                break;
-        }
-    }
-    total_num = detected_num + abort_num + redundant_num;
-
-    cout.setf(ios::fixed);
-    cout.precision(2);
-    cout << "---------------------------------------" << endl;
-    cout << "Test pattern number = " << pattern_num << endl;
-    cout << "Total backtrack number = " << total_backtrack_num << endl;
-    cout << "Backtrack limit = " << BackTrackLimit << endl;
-    cout << "---------------------------------------" << endl;
-    cout << "Total fault number = " << total_num << endl;
-    cout << "Detected fault number = " << detected_num << endl;
-    cout << "Undetected fault number = " << abort_num + redundant_num << endl;
-    cout << "Abort fault number = " << abort_num << endl;
-    cout << "Redundant fault number = " << redundant_num << endl;
-    cout << "---------------------------------------" << endl;
-    cout << "Total equivalent fault number = " << Flist.size() << endl;
-    cout << "Equivalent detected fault number = " << eqv_detected_num << endl;
-    cout << "Equivalent undetected fault number = " << eqv_abort_num + eqv_redundant_num << endl;
-    cout << "Equivalent abort fault number = " << eqv_abort_num << endl;
-    cout << "Equivalent redundant fault number = " << eqv_redundant_num << endl;
-    cout << "---------------------------------------" << endl;
-    cout << "Fault Coverge = " << 100*detected_num/double(total_num) << "%" << endl;
-    cout << "Equivalent FC = " << 100*eqv_detected_num/double(Flist.size()) << "%" << endl;
-    cout << "Fault Efficiency = " << 100*detected_num/double(total_num - redundant_num) << "%" << endl;
-    cout << "---------------------------------------" << endl;
-    return;
-}
-
 //stuck-at fualt PODEM ATPG (fault dropping)
 void CIRCUIT::Atpg()
 {
@@ -296,7 +143,7 @@ void CIRCUIT::Atpg()
     if(!option.retrieve("random_pattern")){
         if (option.retrieve("output")){
             for (i = 0;i<PIlist.size();++i) {
-            OutputStrm << "PI " << PIlist[i]->GetName() << " ";
+                OutputStrm << "PI " << PIlist[i]->GetName() << " ";
             }
             OutputStrm << endl;
         }    
@@ -395,8 +242,8 @@ ATPG_STATUS CIRCUIT::Podem(FAULT* fptr, unsigned &total_backtrack_num)
 
     //set all values as unknown
     for (i = 0;i<Netlist.size();++i) { Netlist[i]->SetValue(X); }
-    //mark propagate paths
     if(print_pt){ cout << "Fault: " << fptr->GetInputGate()->GetName() << " " << fptr->GetValue() << endl;}
+    //mark propagate paths
     MarkPropagateTree(fptr->GetOutputGate());
     //propagate fault free value
     status = SetUniqueImpliedValue(fptr);
@@ -417,16 +264,15 @@ ATPG_STATUS CIRCUIT::Podem(FAULT* fptr, unsigned &total_backtrack_num)
             break;
         case FALSE: break;
     }
-
     while(backtrack_num < BackTrackLimit && status == FALSE) {
         //search possible PI decision
         pi_gptr = TestPossible(fptr);
-        if(print_pt){cout << "  PI decision: " << pi_gptr->GetName() << " " << pi_gptr->PrintValue() << " Backtrack number: " << backtrack_num << endl;        }
         if (pi_gptr) { //decision found
             ScheduleFanout(pi_gptr);
             //push to decision tree
             GateStack.push_back(pi_gptr);
             decision_gptr = pi_gptr;
+            if(print_pt) cout << "  decision point: " << pi_gptr->GetName() << " " << pi_gptr->PrintValue() << endl; 
         }
         else { //backtrack previous decision
             while (!GateStack.empty() && !pi_gptr) {
@@ -438,6 +284,7 @@ ATPG_STATUS CIRCUIT::Podem(FAULT* fptr, unsigned &total_backtrack_num)
                     //remove decision from decision tree
                     GateStack.pop_back();
                     decision_gptr = GateStack.back();
+                    if(print_pt) cout << "  try other decision: " << decision_gptr->GetName() << " " << decision_gptr->PrintValue() << endl;
                 }
                 //inverse current decision value
                 else {
@@ -446,6 +293,7 @@ ATPG_STATUS CIRCUIT::Podem(FAULT* fptr, unsigned &total_backtrack_num)
                     decision_gptr->SetFlag(ALL_ASSIGNED);
                     ++backtrack_num;
                     pi_gptr = decision_gptr;
+                    if(print_pt) cout << "  backtrack to decision: " << decision_gptr->GetName() << " " << decision_gptr->PrintValue() << endl;
                 }
             }
             //no other decision
@@ -462,7 +310,6 @@ ATPG_STATUS CIRCUIT::Podem(FAULT* fptr, unsigned &total_backtrack_num)
             if (CheckTest()) { status = TRUE; }
         }
     } //end while loop
-
     //clean ALL_ASSIGNED and MARKED flags
     list<GATEPTR>::iterator gite;
     for (gite = GateStack.begin();gite != GateStack.end();++gite) {
@@ -637,6 +484,7 @@ GATEPTR CIRCUIT::TestPossible(FAULT* fptr)
             if (ogptr->GetValue() != B && ogptr->GetValue() != D) { return 0; }
             //search D-frontier
             decision_gptr = FindPropagateGate();
+            if (print_pt) cout << "  fault propagate gate: " << decision_gptr->GetName() << endl;
             if (!decision_gptr) { return 0;}
             switch (decision_gptr->GetFunction()) {
                 case G_AND:
@@ -731,6 +579,7 @@ bool CIRCUIT::CheckTest()
     VALUE value;
     for (unsigned i = 0;i<POlist.size();++i) {
         value = POlist[i]->GetValue();
+        // cout << "PO " << POlist[i]->GetName() << " " << POlist[i]->PrintValue() << endl;
         if (value == B || value == D) { return true; }
     }
     return false;

@@ -7,7 +7,7 @@ class FAULT
     private:
         VALUE Value;
         GATE* Input;
-        GATE* Output; //record output gate for branch fault
+        GATE* Output; //record output gate for branch and bridge fault
         //if stem, Input = Output
         bool Branch; //fault is on branch
         unsigned EqvFaultNum; //equivalent fault number (includes itself)

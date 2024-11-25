@@ -67,16 +67,9 @@ case $command_key in
         fi
         ;;
     ass6_e)
-        ./atpg -bridging_atpg -output ../input/${circuit_name}.input ../circuits/iscas85/${circuit_name}.bench
-        ;;
-    b17)
-        ./atpg -ass0 ../circuits/b17.bench
-        ;;
-    s35932_com)
-        ./atpg -ass0 ../circuits/iscas89_com/s35932_com.bench
-        ;;
-    test)
-        ./atpg -random_pattern -output ../input/c7552.input ../circuits/iscas85/c7552.bench
+        # ./atpg -bt 1 -output ../input/${circuit_name}.binput ../circuits/iscas85/${circuit_name}.bench
+        ./atpg -bridging_atpg -output ../input/${circuit_name}.binput ../circuits/iscas85/${circuit_name}.bench
+        ./atpg -bridging_fsim -input ../input/${circuit_name}.input ../circuits/iscas85/${circuit_name}.bench
         ;;
     *)
         echo "Unknown command key: $command_key"
