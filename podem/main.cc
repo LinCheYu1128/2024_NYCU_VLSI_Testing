@@ -216,6 +216,9 @@ int main(int argc, char ** argv)
         Circuit.GenerateC17FaultList();
         Circuit.SortFaninByLevel();
         Circuit.MarkOutputGate();
+        if (option.retrieve("bt")) {
+            Circuit.SetBackTrackLimit(atoi(option.retrieve("bt")));
+        }
         Circuit.Atpg();
     }
     // Assignment 6_d
@@ -241,6 +244,9 @@ int main(int argc, char ** argv)
                 break;
             }
         }
+        if (option.retrieve("bt")) {
+            Circuit.SetBackTrackLimit(atoi(option.retrieve("bt")));
+        }
         Circuit.Atpg();
     } 
     // Assignment 6_e
@@ -249,7 +255,11 @@ int main(int argc, char ** argv)
         Circuit.GenerateBridgingFaultList();
         Circuit.SortFaninByLevel();
         Circuit.MarkOutputGate();
-        Circuit.Atpg();
+        if (option.retrieve("bt")) {
+            Circuit.SetBackTrackLimit(atoi(option.retrieve("bt")));
+        }
+        //bridging fualt ATPG
+        Circuit.BridgeFaultAtpg();
     }
     else {
         // Assignment 4 generate checkpoint fault list and print percentage of fault

@@ -60,7 +60,14 @@ case $command_key in
         ./atpg -c17_proc -output ../input/c17.input ../circuits/iscas85/c17.bench
         ;;
     ass6_d)
-        ./atpg -random_pattern -output ../input/b17.input ../circuits/b17.bench
+        if [[ ${circuit_name} == "b17" ]]; then
+            ./atpg -bt 10 -random_pattern -output ../input/${circuit_name}.input ../circuits/${circuit_name}.bench
+        else
+            ./atpg -bt 10 -random_pattern -output ../input/${circuit_name}.input ../circuits/iscas89_com/${circuit_name}.bench
+        fi
+        ;;
+    ass6_e)
+        ./atpg -bridging_atpg -output ../input/${circuit_name}.input ../circuits/iscas85/${circuit_name}.bench
         ;;
     b17)
         ./atpg -ass0 ../circuits/b17.bench

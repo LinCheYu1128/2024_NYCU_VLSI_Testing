@@ -170,6 +170,8 @@ class CIRCUIT
         void GenerateBridgingFaultList();
         // For assignment 6
         void GenerateC17FaultList();
+        void BridgeFaultAtpg();
+
         void GenerateFaultList();
         void Atpg();
         void SortFaninByLevel();

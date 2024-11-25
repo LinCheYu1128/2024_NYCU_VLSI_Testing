@@ -4,3 +4,4 @@ test.cc
 report/
 test/
 *.input
+*.o
